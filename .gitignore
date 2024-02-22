@@ -1,0 +1,17 @@
+# Local Dev
+*.log
+*.err
+*.pid
+*.out
+.DS_Store
+
+# Airflow
+logs
+airflow.db
+standalone_admin_password.txt
+webserver_config.py
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
