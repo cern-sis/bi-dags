@@ -25,7 +25,7 @@ def test_dag():
     @task()
     def pull_task(test_string, **kwargs):
         logging.info(f"The value from previous task is: {test_string}")
-        return pull
+        return pull()
 
     value = fetch_task()
     pull_task(value)
