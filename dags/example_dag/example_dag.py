@@ -20,6 +20,7 @@ def pull(test_string, **kwargs):
 def test_dag():
     @task()
     def fetch_task(**kwargs):
+        logging.info("First task is running")
         return fetch()
 
     @task()
