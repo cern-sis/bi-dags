@@ -15,7 +15,7 @@ def pull(test_string, **kwargs):
 @dag(
     start_date=pendulum.today("UTC").add(days=-1),
     schedule="@hourly",
-    params={"from_date": None, "until_date": None, "per_page": None},
+    params={},
 )
 def test_dag():
     @task()
@@ -26,7 +26,7 @@ def test_dag():
     @task()
     def pull_task(test_string, **kwargs):
         logging.info(f"The value from previous task is: {test_string}")
-        return pull()
+        return pull(test_string)
 
     value = fetch_task()
     pull_task(value)
