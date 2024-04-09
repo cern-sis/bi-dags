@@ -14,8 +14,11 @@ def oa_dag():
     @task()
     def fetch_data_task(query, **kwargs):
         year = kwargs["params"].get("year")
-        base_query = f"(affiliation:CERN+or+595:'For+annual+report')+\
-        and+year:{year}+not+980:ConferencePaper+not+980:BookChapter"
+        base_query = (
+            r"(affiliation:CERN+or+595:'For+annual+report')"
+            + rf"and+year:{year}+not+980:ConferencePaper+"
+            + r"not+980:BookChapter"
+        )
         type_of_query = [*query][0]
         url = utils.get_url(f"{base_query}+{query[type_of_query]}")
         data = utils.get_data(url)
