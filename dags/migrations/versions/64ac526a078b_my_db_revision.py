@@ -1,7 +1,7 @@
 """My DB Revision
 
 Revision ID: 64ac526a078b
-Revises: 4438ef06e0c7
+Revises:
 Create Date: 2024-04-11 16:06:50.691527
 
 """
