@@ -1,4 +1,4 @@
-FROM apache/airflow:2.8.2-python3.8
+FROM apache/airflow:2.8.2-python3.10
 
 ENV PYTHONBUFFERED=0
 ENV AIRFLOW__LOGGING__LOGGING_LEVEL=INFO

@@ -1,2 +1,4 @@
--c https://raw.githubusercontent.com/apache/airflow/constraints-2.8.1/constraints-3.8.txt
-apache-airflow[celery, postgres]==2.8.1
+-c https://raw.githubusercontent.com/apache/airflow/constraints-2.8.1/constraints-3.10.txt
+apache-airflow[celery, postgres, redis]==2.8.1
+alembic==1.13.1
+airflow-provider-alembic==1.0.0
