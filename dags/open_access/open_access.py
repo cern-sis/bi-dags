@@ -49,7 +49,7 @@ def oa_dag():
         sql="""
         INSERT INTO oa.open_access (year, closed_access, bronze_open_access,
         green_open_access, gold_open_access, created_at, updated_at)
-        VALUES (%(year)s, %(closed)s, %(bronze)s, %(green)s, %(gold)s,
+        VALUES (%(years)s, %(closed)s, %(bronze)s, %(green)s, %(gold)s,
         CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         ON CONFLICT (year)
         DO UPDATE SET
@@ -60,7 +60,7 @@ def oa_dag():
             updated_at = CURRENT_TIMESTAMP;
             """,
         parameters={
-            "year": unpacked_results["year"],
+            "years": unpacked_results["years"],
             "closed": unpacked_results["closed"],
             "bronze": unpacked_results["bronze"],
             "green": unpacked_results["green"],
