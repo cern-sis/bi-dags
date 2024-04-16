@@ -4,6 +4,7 @@ import open_access.utils as utils
 import pendulum
 from airflow.decorators import dag, task
 from airflow.providers.postgres.operators.postgres import PostgresOperator
+from executor_config import kubernetes_executor_config
 
 
 @dag(
@@ -12,7 +13,7 @@ from airflow.providers.postgres.operators.postgres import PostgresOperator
     params={"year": 2023},
 )
 def oa_dag():
-    @task()
+    @task(executor_config=kubernetes_executor_config)
     def fetch_data_task(query, **kwargs):
         year = kwargs["params"].get("year")
         base_query = (
@@ -26,7 +27,7 @@ def oa_dag():
         total = utils.get_total_results_count(data.text)
         return {type_of_query: total}
 
-    @task(multiple_outputs=True)
+    @task(multiple_outputs=True, executor_config=kubernetes_executor_config)
     def join(values, **kwargs):
         results = reduce(lambda a, b: {**a, **b}, values)
         results["years"] = kwargs["params"].get("year")
