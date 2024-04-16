@@ -38,6 +38,12 @@ gold_access_query = (
     r"540__3:'publication'+and+" + r"(540__a:'CC-BY'+OR++540__a:'CC+BY')"
 )
 
+cern_read_and_publish = r"540__f:'CERN-RP"
+cern_individual_apcs = r"540__f:'CERN-APC'"
+scoap3 = r"540__f:'SCOAP3'"
+other = r"540__f:'Other'"
+other_collective_models = r"540__f:'Collective'"
+
 
 @backoff.on_exception(
     backoff.expo, requests.exceptions.ProxyError, max_time=120, max_tries=5
