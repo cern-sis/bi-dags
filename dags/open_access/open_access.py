@@ -26,7 +26,7 @@ def oa_dag():
         total = utils.get_total_results_count(data.text)
         return {type_of_query: total}
 
-    @task()
+    @task(multiple_outputs=True)
     def join(values, **kwargs):
         results = reduce(lambda a, b: {**a, **b}, values)
         results["years"] = kwargs["params"].get("year")
