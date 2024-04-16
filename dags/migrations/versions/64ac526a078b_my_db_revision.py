@@ -38,7 +38,7 @@ def upgrade():
         sa.Column("cern_individual_apcs", sa.Integer, nullable=False),
         sa.Column("scoap3", sa.Integer, nullable=False),
         sa.Column("other", sa.Integer, nullable=False),
-        sa.Column("other_colectives", sa.Integer, nullable=False),
+        sa.Column("other_collective_models", sa.Integer, nullable=False),
         sa.Column("created_at", sa.TIMESTAMP(timezone=True), nullable=False),
         sa.Column("updated_at", sa.TIMESTAMP(timezone=True), nullable=False),
         schema="oa",
