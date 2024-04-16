@@ -47,7 +47,8 @@ def oa_dag():
         task_id="populate_open_access_table",
         postgres_conn_id="superset_qa",
         sql="""
-        INSERT INTO oa.open_access (year, closed_access, bronze_open_access,
+        SET search_path TO oa;
+        INSERT INTO "oa.open_access" (year, closed_access, bronze_open_access,
         green_open_access, gold_open_access, created_at, updated_at)
         VALUES (%(years)s, %(closed)s, %(bronze)s, %(green)s, %(gold)s,
         CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
