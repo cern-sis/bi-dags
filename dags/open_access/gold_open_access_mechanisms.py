@@ -4,6 +4,7 @@ import open_access.utils as utils
 import pendulum
 from airflow.decorators import dag, task
 from airflow.providers.postgres.operators.postgres import PostgresOperator
+from executor_config import kubernetes_executor_config
 
 
 @dag(
@@ -12,7 +13,7 @@ from airflow.providers.postgres.operators.postgres import PostgresOperator
     params={"year": 2023},
 )
 def oa_gold_open_access_mechanisms():
-    @task()
+    @task(executor_config=kubernetes_executor_config)
     def fetch_data_task(query, **kwargs):
         year = kwargs["params"].get("year")
         golden_access_base_query = (
