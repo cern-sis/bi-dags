@@ -50,7 +50,8 @@ def oa_gold_open_access_mechanisms():
         SET search_path TO oa;
         INSERT INTO "oa.open_access" (year, cern_read_and_publish, cern_individual_apcs,
         scoap3, other, other_collective_models, created_at, updated_at)
-        VALUES (%(years)s, %(closed)s, %(bronze)s, %(green)s, %(gold)s,
+        VALUES (%(years)s, %(cern_read_and_publish)s, %(cern_individual_apcs)s,
+        %(scoap3)s, %(other)s, %(other_collective_models)s,
         CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         ON CONFLICT (year)
         DO UPDATE SET
