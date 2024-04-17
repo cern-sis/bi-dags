@@ -27,7 +27,7 @@ def oa_gold_open_access_mechanisms():
         total = utils.get_total_results_count(data.text)
         return {type_of_query: total}
 
-    @task(multiple_outputs=True)
+    @task(multiple_outputs=True, executor_config=kubernetes_executor_config)
     def join(values, **kwargs):
         results = reduce(lambda a, b: {**a, **b}, values)
         results["years"] = kwargs["params"].get("year")
@@ -71,6 +71,7 @@ def oa_gold_open_access_mechanisms():
             "other": unpacked_results["other"],
             "other_collective_models": unpacked_results["other_collective_models"],
         },
+        executor_config=kubernetes_executor_config,
     )
 
 

@@ -68,6 +68,7 @@ def oa_dag():
             "green": unpacked_results["green"],
             "gold": unpacked_results["gold"],
         },
+        executor_config=kubernetes_executor_config,
     )
 
 
