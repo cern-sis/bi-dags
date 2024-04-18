@@ -4,6 +4,7 @@ import pendulum
 from airflow.models import DAG
 from airflow.models.param import Param
 from airflow_provider_alembic.operators.alembic import AlembicOperator
+from executor_config import kubernetes_executor_config
 
 with DAG(
     "migrations",
@@ -17,4 +18,5 @@ with DAG(
         command="{{ params.command }}",
         revision="{{ params.revision }}",
         script_location=f"{os.environ['AIRFLOW_HOME']}/dags/migrations/",
+        executor_config=kubernetes_executor_config,
     )
