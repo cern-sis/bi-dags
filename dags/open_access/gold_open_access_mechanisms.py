@@ -48,8 +48,7 @@ def oa_gold_open_access_mechanisms():
         task_id="populate_golden_open_access",
         postgres_conn_id="superset_qa",
         sql="""
-        SET search_path TO oa;
-        INSERT INTO "oa.golden_open_access" (year, cern_read_and_publish, cern_individual_apcs,
+        INSERT INTO oa_golden_open_access (year, cern_read_and_publish, cern_individual_apcs,
         scoap3, other, other_collective_models, created_at, updated_at)
         VALUES (%(years)s, %(cern_read_and_publish)s, %(cern_individual_apcs)s,
         %(scoap3)s, %(other)s, %(other_collective_models)s,
