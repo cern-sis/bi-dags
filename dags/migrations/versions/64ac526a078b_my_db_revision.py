@@ -18,9 +18,8 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade():
-    op.execute("CREATE SCHEMA IF NOT EXISTS oa")
     op.create_table(
-        "oa.open_access",
+        "oa_open_access",
         sa.Column("year", sa.Integer, primary_key=True),
         sa.Column("closed_access", sa.Integer, nullable=False),
         sa.Column("bronze_open_access", sa.Integer, nullable=False),
@@ -28,11 +27,10 @@ def upgrade():
         sa.Column("gold_open_access", sa.Integer, nullable=False),
         sa.Column("created_at", sa.TIMESTAMP(timezone=True), nullable=False),
         sa.Column("updated_at", sa.TIMESTAMP(timezone=True), nullable=False),
-        schema="oa",
     )
 
     op.create_table(
-        "oa.golden_open_access",
+        "oa_golden_open_access",
         sa.Column("year", sa.Integer, primary_key=True),
         sa.Column("cern_read_and_publish", sa.Integer, nullable=False),
         sa.Column("cern_individual_apcs", sa.Integer, nullable=False),
@@ -41,10 +39,9 @@ def upgrade():
         sa.Column("other_collective_models", sa.Integer, nullable=False),
         sa.Column("created_at", sa.TIMESTAMP(timezone=True), nullable=False),
         sa.Column("updated_at", sa.TIMESTAMP(timezone=True), nullable=False),
-        schema="oa",
     )
 
 
 def downgrade():
-    op.drop_table("oa.golden_open_access", schema="oa")
-    op.drop_table("oa.open_access", schema="oa")
+    op.drop_table("oa_golden_open_access")
+    op.drop_table("oa_open_access")
