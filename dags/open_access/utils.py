@@ -24,7 +24,7 @@ def get_gold_access_count(total, url):
         full_url = f"{url}&jrec={jrec}"
         data = get_data(full_url)
         golden_access_records_ids_count = golden_access_records_ids_count + len(
-            get_golden_access_records_ids(data)
+            get_golden_access_records_ids(data.text)
         )
     return golden_access_records_ids_count
 
