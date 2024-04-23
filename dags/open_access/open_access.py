@@ -25,6 +25,10 @@ def oa_dag():
         url = utils.get_url(f"{base_query}+{query[type_of_query]}")
         data = utils.get_data(url)
         total = utils.get_total_results_count(data.text)
+        if type_of_query == "gold":
+            total = utils.get_gold_access_count(total, url)
+        if type_of_query == "green":
+            total = total - utils.get_gold_access_count(total, url)
         return {type_of_query: total}
 
     @task(multiple_outputs=True, executor_config=kubernetes_executor_config)

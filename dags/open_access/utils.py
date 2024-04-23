@@ -1,7 +1,9 @@
+import math
 import re
 
 import backoff
 import requests
+from open_access.parsers import get_golden_access_records_ids
 
 
 def get_url(query, current_collection="Published+Articles"):
@@ -11,6 +13,20 @@ def get_url(query, current_collection="Published+Articles"):
         + r"Published+Articles&c=&sf=&so=d&rm=&rg=100&sc=0&of=xm"
     )
     return url
+
+
+def get_gold_access_count(total, url):
+    iterations = math.ceil(total / 100.0)
+    golden_access_records_ids_count = 0
+
+    for i in range(0, iterations):
+        jrec = (i * 100) + 1
+        full_url = f"{url}&jrec={jrec}"
+        data = get_data(full_url)
+        golden_access_records_ids_count = golden_access_records_ids_count + len(
+            get_golden_access_records_ids(data)
+        )
+    return golden_access_records_ids_count
 
 
 def get_total_results_count(data):
