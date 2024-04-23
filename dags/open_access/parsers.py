@@ -19,6 +19,8 @@ def get_golden_access_records_ids(data):
     golden_access = []
     for record in records:
         datafields = record.find("datafield/[@tag='540']")
+        if datafields is None:
+            continue
         record_type = datafields.find("subfield/[@code='3']")
         license = datafields.find("subfield/[@code='a']")
         if record_type is not None and license is not None:
