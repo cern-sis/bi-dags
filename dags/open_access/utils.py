@@ -37,7 +37,7 @@ def get_total_results_count(data):
     match = TOTAL_RECORDS_COUNT.search(comment_line)
     try:
         total_records_count = match.group(1)
-        return total_records_count
+        return int(total_records_count)
     except AttributeError:
         return 0
 
