@@ -26,12 +26,11 @@ def oa_dag():
             r"(affiliation:CERN+or+595:'For+annual+report')"
             + rf"and+year:{year}+not+980:ConferencePaper+"
             + r"not+980:BookChapter"
-            + rf"&apikey={cds_token}"
-            if cds_token
-            else ""
         )
         type_of_query = [*query][0]
-        url = utils.get_url(f"{base_query}+{query[type_of_query]}")
+        url = utils.get_url(
+            query=f"{base_query}+{query[type_of_query]}", cds_token=cds_token
+        )
         data = utils.request_again_if_failed(url)
         total = utils.get_total_results_count(data.text)
         if type_of_query == "gold":

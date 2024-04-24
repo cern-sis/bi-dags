@@ -51,3 +51,13 @@ def get_gold_access_count(total, url):
             get_golden_access_records_ids(response.text)
         )
     return records_ids_count
+
+
+def get_url(query, current_collection="Published+Articles", cds_token=None):
+    url = (
+        rf"https://cds.cern.ch/search?ln=en&cc={current_collection}&p={query}"
+        + r"&action_search=Search&op1=a&m1=a&p1=&f1=&c="
+        + r"Published+Articles&c=&sf=&so=d&rm=&rg=100&sc=0&of=xm"
+    )
+    url = url + (rf"&apikey={cds_token}" if cds_token else "")
+    return url
