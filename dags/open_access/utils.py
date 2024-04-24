@@ -4,6 +4,7 @@ import re
 
 import requests
 from common.exceptions import DataFetchError, NotFoundTotalCountOfRecords, WrongInput
+from open_access.parsers import get_golden_access_records_ids
 
 
 def request_again_if_failed(url):
@@ -31,13 +32,6 @@ def get_total_results_count(data):
         raise NotFoundTotalCountOfRecords
 
 
-cern_read_and_publish = r"540__f:'CERN-RP"
-cern_individual_apcs = r"540__f:'CERN-APC'"
-scoap3 = r"540__f:'SCOAP3'"
-other = r"540__f:'Other'"
-other_collective_models = r"540__f:'Collective'"
-
-
 def check_year(year):
     current_year = datetime.date.today().year
     if type(year) == int:
@@ -46,12 +40,14 @@ def check_year(year):
     raise WrongInput(year, current_year)
 
 
-def filter_records(total, url, filter_func):
+def get_gold_access_count(total, url):
     iterations = math.ceil(total / 100.0)
     records_ids_count = 0
     for i in range(0, iterations):
         jrec = (i * 100) + 1
         full_url = f"{url}&jrec={jrec}"
         response = request_again_if_failed(full_url)
-        records_ids_count = records_ids_count + len(filter_func(response.text))
+        records_ids_count = records_ids_count + len(
+            get_golden_access_records_ids(response.text)
+        )
     return records_ids_count
