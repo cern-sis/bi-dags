@@ -1,5 +1,6 @@
 from functools import reduce
 
+import open_access.constants as constants
 import open_access.utils as utils
 import pendulum
 from airflow.decorators import dag, task
@@ -35,10 +36,10 @@ def oa_gold_open_access_mechanisms():
 
     results = fetch_data_task.expand(
         query=[
-            {"cern_read_and_publish": utils.cern_read_and_publish},
-            {"cern_individual_apcs": utils.cern_individual_apcs},
-            {"scoap3": utils.scoap3},
-            {"other": utils.other},
+            {"cern_read_and_publish": constants.CERN_READ_AND_PUBLISH},
+            {"cern_individual_apcs": constants.CERN_INDIVIDUAL_APCS},
+            {"scoap3": constants.SCOAP3},
+            {"other": constants.OTHER},
             {"other_collective_models": utils.other_collective_models},
         ],
     )
