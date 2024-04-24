@@ -1,8 +1,10 @@
+import datetime
 import math
 import re
 
 import backoff
 import requests
+from common.exceptions import WrongInput
 from open_access.parsers import get_golden_access_records_ids
 
 
@@ -62,7 +64,15 @@ other_collective_models = r"540__f:'Collective'"
 
 
 @backoff.on_exception(
-    backoff.expo, requests.exceptions.ProxyError, max_time=120, max_tries=5
+    backoff.expo, requests.exceptions.ProxyError, max_time=1000, max_tries=10
 )
 def get_data(url):
     return requests.get(url)
+
+
+def check_year(year):
+    current_year = datetime.date.today().year
+    if type(year) == int:
+        if int(year) >= 2004 and int(year) <= current_year:
+            return year
+    raise WrongInput(year, current_year)
