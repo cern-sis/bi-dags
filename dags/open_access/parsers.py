@@ -18,19 +18,20 @@ def get_golden_access_records_ids(data):
     records = xml.findall(".record")
     golden_access = []
     for record in records:
-        datafields = record.find("datafield/[@tag='540']")
+        datafields = record.findall("datafield/[@tag='540']")
         if datafields is None:
             continue
-        record_type = datafields.find("subfield/[@code='3']")
-        license = datafields.find("subfield/[@code='a']")
-        if record_type is not None and license is not None:
-            if (
-                "CC" in license.text
-                and "BY" in license.text
-                and record_type.text == "publication"
-            ):
-                record_id = record.find("controlfield/[@tag='001']")
-                if record_id is not None:
-                    doi = record_id.text
-                    golden_access.append(doi)
+        for datafield in datafields:
+            record_type = datafield.find("subfield/[@code='3']")
+            license = datafield.find("subfield/[@code='a']")
+            if record_type is not None and license is not None:
+                if (
+                    "CC" in license.text
+                    and "BY" in license.text
+                    and record_type.text == "publication"
+                ):
+                    record_id = record.find("controlfield/[@tag='001']")
+                    if record_id is not None:
+                        doi = record_id.text
+                        golden_access.append(doi)
     return golden_access
