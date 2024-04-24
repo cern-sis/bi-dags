@@ -4,7 +4,6 @@ import open_access.utils as utils
 import pendulum
 from airflow.decorators import dag, task
 from airflow.providers.postgres.operators.postgres import PostgresOperator
-from common.exceptions import DataFetchError
 from executor_config import kubernetes_executor_config
 
 
@@ -24,14 +23,8 @@ def oa_gold_open_access_mechanisms():
         )
         type_of_query = [*query][0]
         url = utils.get_url(f"{golden_access_base_query}+{query[type_of_query]}")
-        response = utils.get_data(url)
-        count = 1
-        while response.status_code == 502 and count != 10:
-            count = count + 1
-            response = utils.get_data(url)
-        if response.status_code != 200:
-            raise DataFetchError(url, response.status_code)
-        total = utils.get_total_results_count(response.text)
+        data = utils.request_again_if_failed(url)
+        total = utils.get_total_results_count(data.text)
         return {type_of_query: total}
 
     @task(multiple_outputs=True, executor_config=kubernetes_executor_config)

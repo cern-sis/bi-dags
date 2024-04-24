@@ -1,10 +1,10 @@
 from functools import reduce
 
-import open_access.utils as utils
 import pendulum
 from airflow.decorators import dag, task
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 from executor_config import kubernetes_executor_config
+from open_access.open_access_api import OpenAccessApi
 
 
 @dag(
@@ -14,39 +14,46 @@ from executor_config import kubernetes_executor_config
 )
 def oa_dag():
     @task(executor_config=kubernetes_executor_config)
-    def fetch_data_task(query, **kwargs):
+    def set_a_year(**kwargs):
         year = kwargs["params"].get("year")
-        base_query = (
-            r"(affiliation:CERN+or+595:'For+annual+report')"
-            + rf"and+year:{year}+not+980:ConferencePaper+"
-            + r"not+980:BookChapter"
-        )
-        type_of_query = [*query][0]
-        url = utils.get_url(f"{base_query}+{query[type_of_query]}")
-        data = utils.get_data(url)
-        total = utils.get_total_results_count(data.text)
-        if type_of_query == "gold":
-            total = utils.get_gold_access_count(total, url)
-        if type_of_query == "green":
-            total = total - utils.get_gold_access_count(total, url)
-        return {type_of_query: total}
+        return OpenAccessApi(year=year)
 
-    @task(multiple_outputs=True, executor_config=kubernetes_executor_config)
+    @task(executor_config=kubernetes_executor_config)
+    def fetch_closed_access(api, **kwargs):
+        return api.get_closed_access_total_count()
+
+    @task(executor_config=kubernetes_executor_config)
+    def fetch_bronze_access(api, **kwargs):
+        return api.get_bronze_access_total_count()
+
+    @task(executor_config=kubernetes_executor_config)
+    def fetch_green_access(api, **kwargs):
+        return api.get_green_access_total_count()
+
+    @task(executor_config=kubernetes_executor_config)
+    def fetch_gold_access(api, **kwargs):
+        return api.get_gold_access_total_count()
+
+    @task(executor_config=kubernetes_executor_config)
     def join(values, **kwargs):
         results = reduce(lambda a, b: {**a, **b}, values)
         results["years"] = kwargs["params"].get("year")
         return results
 
-    results = fetch_data_task.expand(
-        query=[
-            {"closed": utils.closed_access_query},
-            {"bronze": utils.bronze_access_query},
-            {"green": utils.green_access_query},
-            {"gold": utils.gold_access_query},
-        ],
-    )
+    api = set_a_year()
+    closed_access_count = fetch_closed_access(api)
+    closed_bronze_count = fetch_bronze_access(api)
+    closed_green__count = fetch_green_access(api)
+    closed_gold_count = fetch_gold_access(api)
 
-    unpacked_results = join(results)
+    unpacked_results = join(
+        [
+            closed_access_count,
+            closed_bronze_count,
+            closed_green__count,
+            closed_gold_count,
+        ]
+    )
 
     PostgresOperator(
         task_id="populate_open_access_table",
