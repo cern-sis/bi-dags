@@ -1,4 +1,5 @@
 import datetime
+import logging
 import math
 import re
 
@@ -53,6 +54,7 @@ def get_gold_access_count(total, url):
         records_ids_count = records_ids_count + len(
             get_golden_access_records_ids(response.text)
         )
+    logging.info(f"In total was found {records_ids_count} golden access records")
     return records_ids_count
 
 
