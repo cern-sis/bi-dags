@@ -7,7 +7,10 @@ from common.exceptions import DataFetchError, NotFoundTotalCountOfRecords, Wrong
 from open_access.parsers import get_golden_access_records_ids
 
 
-def request_again_if_failed(url):
+def request_again_if_failed(url, cds_token=None):
+    if cds_token:
+        header = {"Authorization": f"token {cds_token}"}
+        response = requests.get(url, header)
     response = requests.get(url)
     count = 1
 
@@ -53,11 +56,10 @@ def get_gold_access_count(total, url):
     return records_ids_count
 
 
-def get_url(query, current_collection="Published+Articles", cds_token=None):
+def get_url(query, current_collection="Published+Articles"):
     url = (
         rf"https://cds.cern.ch/search?ln=en&cc={current_collection}&p={query}"
         + r"&action_search=Search&op1=a&m1=a&p1=&f1=&c="
         + r"Published+Articles&c=&sf=&so=d&rm=&rg=100&sc=0&of=xm"
     )
-    url = url + (rf"&apikey={cds_token}" if cds_token else "")
     return url

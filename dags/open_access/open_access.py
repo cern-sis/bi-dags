@@ -1,4 +1,5 @@
 import logging
+import os
 from functools import reduce
 
 import open_access.constants as constants
@@ -18,7 +19,7 @@ def oa_dag():
     @task(executor_config=kubernetes_executor_config)
     def fetch_data_task(query, **kwargs):
         year = kwargs["params"].get("year")
-        cds_token = None  # os.environ.get("CDS_TOKEN")
+        cds_token = os.environ.get("CDS_TOKEN")
         if not cds_token:
             logging.warning("cds token is not set!")
         base_query = (
@@ -27,10 +28,8 @@ def oa_dag():
             + r"not+980:BookChapter"
         )
         type_of_query = [*query][0]
-        url = utils.get_url(
-            query=f"{base_query}+{query[type_of_query]}", cds_token=cds_token
-        )
-        data = utils.request_again_if_failed(url)
+        url = utils.get_url(query=f"{base_query}+{query[type_of_query]}")
+        data = utils.request_again_if_failed(url=url, cds_token=cds_token)
         total = utils.get_total_results_count(data.text)
         if type_of_query == "gold":
             total = utils.get_gold_access_count(total, url)
