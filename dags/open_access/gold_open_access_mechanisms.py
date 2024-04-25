@@ -1,5 +1,6 @@
 from functools import reduce
 
+import open_access.constants as constants
 import open_access.utils as utils
 import pendulum
 from airflow.decorators import dag, task
@@ -23,7 +24,7 @@ def oa_gold_open_access_mechanisms():
         )
         type_of_query = [*query][0]
         url = utils.get_url(f"{golden_access_base_query}+{query[type_of_query]}")
-        data = utils.get_data(url)
+        data = utils.request_again_if_failed(url)
         total = utils.get_total_results_count(data.text)
         return {type_of_query: total}
 
@@ -35,11 +36,11 @@ def oa_gold_open_access_mechanisms():
 
     results = fetch_data_task.expand(
         query=[
-            {"cern_read_and_publish": utils.cern_read_and_publish},
-            {"cern_individual_apcs": utils.cern_individual_apcs},
-            {"scoap3": utils.scoap3},
-            {"other": utils.other},
-            {"other_collective_models": utils.other_collective_models},
+            {"cern_read_and_publish": constants.CERN_READ_AND_PUBLISH},
+            {"cern_individual_apcs": constants.CERN_INDIVIDUAL_APCS},
+            {"scoap3": constants.SCOAP3},
+            {"other": constants.OTHER},
+            {"other_collective_models": constants.OTHER_COLLECTIVE_MODELS},
         ],
     )
     unpacked_results = join(results)

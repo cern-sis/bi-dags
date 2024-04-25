@@ -1,5 +1,7 @@
+import logging
 from functools import reduce
 
+import open_access.constants as constants
 import open_access.utils as utils
 import pendulum
 from airflow.decorators import dag, task
@@ -16,15 +18,24 @@ def oa_dag():
     @task(executor_config=kubernetes_executor_config)
     def fetch_data_task(query, **kwargs):
         year = kwargs["params"].get("year")
+        cds_token = None  # os.environ.get("CDS_TOKEN")
+        if not cds_token:
+            logging.warning("cds token is not set!")
         base_query = (
             r"(affiliation:CERN+or+595:'For+annual+report')"
             + rf"and+year:{year}+not+980:ConferencePaper+"
             + r"not+980:BookChapter"
         )
         type_of_query = [*query][0]
-        url = utils.get_url(f"{base_query}+{query[type_of_query]}")
-        data = utils.get_data(url)
+        url = utils.get_url(
+            query=f"{base_query}+{query[type_of_query]}", cds_token=cds_token
+        )
+        data = utils.request_again_if_failed(url)
         total = utils.get_total_results_count(data.text)
+        if type_of_query == "gold":
+            total = utils.get_gold_access_count(total, url)
+        if type_of_query == "green":
+            total = total - utils.get_gold_access_count(total, url)
         return {type_of_query: total}
 
     @task(multiple_outputs=True, executor_config=kubernetes_executor_config)
@@ -35,13 +46,12 @@ def oa_dag():
 
     results = fetch_data_task.expand(
         query=[
-            {"closed": utils.closed_access_query},
-            {"bronze": utils.bronze_access_query},
-            {"green": utils.green_access_query},
-            {"gold": utils.gold_access_query},
+            {"closed": constants.CLOSED_ACCESS},
+            {"bronze": constants.BRONZE_ACCESS},
+            {"green": constants.GREEN_ACCESS},
+            {"gold": constants.GOLD_ACCESS},
         ],
     )
-
     unpacked_results = join(results)
 
     PostgresOperator(
