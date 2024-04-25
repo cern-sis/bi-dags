@@ -40,7 +40,7 @@ def oa_gold_open_access_mechanisms():
             {"cern_individual_apcs": constants.CERN_INDIVIDUAL_APCS},
             {"scoap3": constants.SCOAP3},
             {"other": constants.OTHER},
-            {"other_collective_models": utils.other_collective_models},
+            {"other_collective_models": constants.OTHER_COLLECTIVE_MODELS},
         ],
     )
     unpacked_results = join(results)

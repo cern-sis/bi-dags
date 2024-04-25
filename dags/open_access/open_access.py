@@ -47,10 +47,10 @@ def oa_dag():
 
     results = fetch_data_task.expand(
         query=[
-            {"closed_access": constants.CLOSED_ACCESS},
-            {"bronze_open_access": constants.BRONZE_ACCESS},
-            {"green_open_access": constants.GREEN_ACCESS},
-            {"gold_open_access": constants.GOLD_ACCESS},
+            {"closed": constants.CLOSED_ACCESS},
+            {"bronze": constants.BRONZE_ACCESS},
+            {"green": constants.GREEN_ACCESS},
+            {"gold": constants.GOLD_ACCESS},
         ],
     )
     unpacked_results = join(results)
