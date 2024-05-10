@@ -7,6 +7,7 @@ import open_access.utils as utils
 import pendulum
 from airflow.decorators import dag, task
 from airflow.providers.postgres.operators.postgres import PostgresOperator
+from common.utils import get_total_results_count, request_again_if_failed
 from executor_config import kubernetes_executor_config
 
 
@@ -29,8 +30,8 @@ def oa_dag():
         )
         type_of_query = [*query][0]
         url = utils.get_url(query=f"{base_query}+{query[type_of_query]}")
-        data = utils.request_again_if_failed(url=url, cds_token=cds_token)
-        total = utils.get_total_results_count(data.text)
+        data = request_again_if_failed(url=url, cds_token=cds_token)
+        total = get_total_results_count(data.text)
         if type_of_query == "gold":
             total = utils.get_gold_access_count(total, url)
         if type_of_query == "green":
