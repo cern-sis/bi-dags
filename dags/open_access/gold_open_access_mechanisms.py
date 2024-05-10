@@ -1,11 +1,12 @@
 from functools import reduce
 
 import open_access.constants as constants
-import open_access.utils as utils
 import pendulum
 from airflow.decorators import dag, task
 from airflow.providers.postgres.operators.postgres import PostgresOperator
+from common.utils import get_total_results_count, request_again_if_failed
 from executor_config import kubernetes_executor_config
+from open_access.utils import get_url
 
 
 @dag(
@@ -23,9 +24,9 @@ def oa_gold_open_access_mechanisms():
             + r"not+980:BookChapter+not+595:'Not+for+annual+report"
         )
         type_of_query = [*query][0]
-        url = utils.get_url(f"{golden_access_base_query}+{query[type_of_query]}")
-        data = utils.request_again_if_failed(url)
-        total = utils.get_total_results_count(data.text)
+        url = get_url(f"{golden_access_base_query}+{query[type_of_query]}")
+        data = request_again_if_failed(url)
+        total = get_total_results_count(data.text)
         return {type_of_query: total}
 
     @task(multiple_outputs=True, executor_config=kubernetes_executor_config)
