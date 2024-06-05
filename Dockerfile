@@ -1,4 +1,4 @@
-FROM apache/airflow:2.8.2-python3.10
+FROM registry.cern.ch/cern-sis/airflow-base:2.8.3
 
 ENV PYTHONBUFFERED=0
 ENV AIRFLOW__LOGGING__LOGGING_LEVEL=INFO
