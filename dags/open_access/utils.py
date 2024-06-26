@@ -2,21 +2,28 @@ import logging
 import math
 
 from common.utils import request_again_if_failed
-from open_access.parsers import get_golden_access_records_ids
+from open_access.parsers import (get_golden_access_records_ids,
+                                 get_green_access_records_ids)
 
 
-def get_gold_access_count(total, url):
+def get_count(total, url, record_extractor):
     iterations = math.ceil(total / 100.0)
     records_ids_count = 0
     for i in range(0, iterations):
         jrec = (i * 100) + 1
         full_url = f"{url}&jrec={jrec}"
         response = request_again_if_failed(full_url)
-        records_ids_count = records_ids_count + len(
-            get_golden_access_records_ids(response.text)
-        )
+        records_ids_count = records_ids_count + len(record_extractor(response.text))
     logging.info(f"In total was found {records_ids_count} golden access records")
     return records_ids_count
+
+
+def get_golden_access_count(total, url):
+    return get_count(total, url, get_golden_access_records_ids)
+
+
+def get_green_access_count(total, url):
+    return get_count(total, url, get_green_access_records_ids)
 
 
 def get_url(query, current_collection="Published+Articles"):
