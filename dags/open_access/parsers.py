@@ -31,7 +31,7 @@ def field_has_cc_by(field_value):
     return bool(pattern.match(field_value))
 
 
-def parse_subset_856(datafields_856):
+def is_subset_856_for_green_access(datafields_856):
     at_least_one_found = False
     for datafield in datafields_856:
         subfield = datafield.find("subfield[@code='y']")
@@ -45,7 +45,7 @@ def parse_subset_856(datafields_856):
     return at_least_one_found
 
 
-def parse_subset_540_preprint(datafields_540):
+def is_subset_540_preprint_green_access(datafields_540):
     at_least_one_found = False
     for datafield in datafields_540:
         subfield_3 = datafield.find("subfield[@code='3']")
@@ -58,7 +58,7 @@ def parse_subset_540_preprint(datafields_540):
     return at_least_one_found
 
 
-def parse_subset_540_publication(datafields_540):
+def is_subset_540_publication_golden_access(datafields_540):
     at_least_one_found = False
     for datafield in datafields_540:
         subfield_3 = datafield.find("subfield[@code='3']")
@@ -84,9 +84,9 @@ def parse_subset_green_access(records):
             continue
         if datafields_540 is None:
             continue
-        is_it_wanted_record_by_856 = parse_subset_856(datafields_856)
-        is_it_wanted_record_by_540_preprint = parse_subset_540_preprint(datafields_540)
-        is_it_wanted_record_by_540_publication = not parse_subset_540_publication(
+        is_it_wanted_record_by_856 = is_subset_856_for_green_access(datafields_856)
+        is_it_wanted_record_by_540_preprint = is_subset_540_preprint_green_access(datafields_540)
+        is_it_wanted_record_by_540_publication = not is_subset_540_publication_golden_access(
             datafields_540
         )
 
@@ -106,7 +106,7 @@ def parse_subset_golden_access(records):
         datafields_540 = record.findall("datafield/[@tag='540']")
         if datafields_540 is None:
             continue
-        is_it_wanted_record_by_540_publication = parse_subset_540_publication(
+        is_it_wanted_record_by_540_publication = is_subset_540_publication_golden_access(
             datafields_540
         )
 

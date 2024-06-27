@@ -1,7 +1,7 @@
 from open_access.parsers import (get_golden_access_records_ids,
                                  get_green_access_records_ids,
-                                 parse_subset_540_preprint,
-                                 parse_subset_540_publication, parse_subset_856,
+                                 is_subset_540_preprint_green_access,
+                                 is_subset_540_publication_golden_access, is_subset_856_for_green_access,
                                  parse_without_names_spaces)
 
 expected_golden = [
@@ -60,7 +60,7 @@ def test_parse_subset_856(shared_datadir):
             datafields_856 = record.findall(
                 "datafield[@tag='856'][@ind1='4'][@ind2=' ']"
             )
-            is_it_wanted_record_by_856 = parse_subset_856(datafields_856)
+            is_it_wanted_record_by_856 = is_subset_856_for_green_access(datafields_856)
             if is_it_wanted_record_by_856:
                 filtered_records_count = filtered_records_count + 1
         assert filtered_records_count == 0
@@ -75,7 +75,7 @@ def test_parse_subset_540_preprint(shared_datadir):
             datafields_540 = record.findall(
                 "datafield[@tag='540'][@ind1=' '][@ind2=' ']"
             )
-            is_it_wanted_record_by_540 = parse_subset_540_preprint(datafields_540)
+            is_it_wanted_record_by_540 = is_subset_540_preprint_green_access(datafields_540)
             if is_it_wanted_record_by_540:
                 filtered_records_count = filtered_records_count + 1
         assert filtered_records_count == 20
@@ -90,7 +90,7 @@ def test_parse_subset_540_publications(shared_datadir):
             datafields_540 = record.findall(
                 "datafield[@tag='540'][@ind1=' '][@ind2=' ']"
             )
-            is_it_wanted_record_by_540 = parse_subset_540_publication(datafields_540)
+            is_it_wanted_record_by_540 = is_subset_540_publication_golden_access(datafields_540)
             if is_it_wanted_record_by_540:
                 filtered_records_count = filtered_records_count + 1
         assert filtered_records_count == 14
