@@ -1,3 +1,9 @@
+# What is BI-DAGs
+
+BI-DAGs is a component of the monitoring project developed for the RCS-SIS group. It plays an important role in tracking key performance indicators (KPIs) to monitor progress and analyze the current situation.
+
+BI-DAGs operates as an Apache Airflow instance dedicated to managing data harvesting from various sources including CDS, ILS, and others. The harvested data is then processed and pushed into a PostgreSQL database. Subsequently, Apache Superset retrieves this data to present it in the desired format for analysis and reporting.
+
 # BI-DAGs Setup Guide
 
 This README provides a step-by-step guide on setting up your environment for running BI-DAGs with Airflow.
