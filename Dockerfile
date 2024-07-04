@@ -9,4 +9,4 @@ COPY requirements-test.txt ./requirements-test.txt
 
 COPY dags ./dags
 
-RUN pip install --no-cache-dir --user  -r requirements-test.txt -r requirements.txt
+RUN pip install -r requirements-test.txt -r requirements.txt
