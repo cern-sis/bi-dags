@@ -51,7 +51,7 @@ def oa_dag():
 
     PostgresOperator(
         task_id="populate_open_access_table",
-        postgres_conn_id="superset_qa",
+        postgres_conn_id="superset",
         sql="""
         INSERT INTO oa_open_access (year, closed_access, bronze_open_access,
         green_open_access, gold_open_access, created_at, updated_at)

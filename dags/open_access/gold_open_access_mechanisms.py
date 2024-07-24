@@ -70,7 +70,7 @@ def oa_gold_open_access_mechanisms():
 
     populate_golden_open_access = PostgresOperator(
         task_id="populate_golden_open_access",
-        postgres_conn_id="superset_qa",
+        postgres_conn_id="superset",
         sql="""
         INSERT INTO oa_golden_open_access (year, cern_read_and_publish, cern_individual_apcs,
         scoap3, other, other_collective_models, created_at, updated_at)

@@ -14,7 +14,7 @@ with DAG(
 ) as dag:
     AlembicOperator(
         task_id="alembic_op",
-        conn_id="superset_qa",
+        conn_id="superset",
         command="{{ params.command }}",
         revision="{{ params.revision }}",
         script_location=f"{os.environ['AIRFLOW_HOME']}/dags/migrations/",
