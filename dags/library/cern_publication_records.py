@@ -45,7 +45,7 @@ def library_cern_publication_records_dag():
 
     PostgresOperator(
         task_id="populate_library_cern_publication_records_table",
-        postgres_conn_id="superset_qa",
+        postgres_conn_id="superset",
         sql="""
         INSERT INTO library_cern_publication_records (year,
         publications_total_count, conference_proceedings_count,

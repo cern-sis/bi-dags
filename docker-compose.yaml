@@ -60,7 +60,7 @@ x-airflow-common: &airflow-common
     AIRFLOW__CORE__LOAD_EXAMPLES: "true"
     AIRFLOW__API__AUTH_BACKENDS: "airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session"
     AIRFLOW_CONN_CDS: "http://cds.cern.ch"
-    AIRFLOW_CONN_SUPERSET_QA: "postgresql://bi_local:bi_local@postgres_local:5432/bi_local"
+    AIRFLOW_CONN_SUPERSET: "postgresql://bi_local:bi_local@postgres_local:5432/bi_local"
     # yamllint disable rule:line-length
     # Use simple http server on scheduler for health checks
     # See https://airflow.apache.org/docs/apache-airflow/stable/administration-and-deployment/logging-monitoring/check-health.html#scheduler-health-check-server
