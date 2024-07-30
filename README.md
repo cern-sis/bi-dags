@@ -130,6 +130,8 @@ After creating the user, you can log in to the Airflow UI with the credentials y
 
 ## Database Migrations
 
+### Via Command Line
+
 By following these guidelines, you can seamlessly manage and track database migrations within your Airflow environment.
 Database migrations are done by running [migrations](https://github.com/cern-sis/bi-dags/blob/main/dags/migrations/migrations.py) DAG.
 To create a new migration you need:
@@ -158,7 +160,31 @@ This command generates a new migration script.
 {"command": "upgrade", "revision": "64ac526a078b"}
 ```
 
+To downgrade to a specific version, such as 64ac526a078b, use the following command:
+
+```python
+{"command": "downgrade", "revision": "64ac526a078b"}
+```
+
+If you wish to downgrade to the very first version (prior to the first Alembic migration), enter "base" instead of a revision number.
+
 This can be done through the API by passing the parameters, or via the UI by initiating the DAG with these settings.
 
 5. **Push the Version File:**
    Ensure to commit and push the updated version file to the main branch to apply the migrations in QA or PRODUCTION environments.
+
+### Via Airflow UI:
+
+1. Select the "migration" DAG:
+   - In the list of DAGs, find and click on the "migration" DAG to open its details page.
+     Trigger the "migration" DAG:
+   - Click on the "Trigger DAG" button, represented by a play icon or labeled as "Trigger DAG" on the top right of the DAG details page.
+     Enter Parameters:
+   - A parameters selection window will appear.
+     Type the desired command (either upgrade or downgrade) in the command field.
+2. Enter the specific revision number in the revision field.
+3. Confirm and Trigger:
+   - Review the parameters you have entered.
+     Click the "Trigger" button to start the DAG with the specified parameters
+
+![migrations_airflow_ui](./migrations_airflow_ui.png)
