@@ -16,7 +16,7 @@ from tenacity import retry_if_exception_type, stop_after_attempt
     params={"year": 2023},
 )
 def oa_gold_open_access_mechanisms():
-    @task(multiple_outputs=True)
+    @task(multiple_outputs=True, executor_config=kubernetes_executor_config)
     def generate_params(query, **kwargs):
         year = kwargs["params"].get("year")
         current_collection = "Published+Articles"
@@ -35,7 +35,7 @@ def oa_gold_open_access_mechanisms():
             "type_of_query": type_of_query,
         }
 
-    @task
+    @task(executor_config=kubernetes_executor_config)
     def fetch_count(parameters):
         http_hook = HttpHook(http_conn_id="cds", method="GET")
         response = http_hook.run_with_advanced_retry(
