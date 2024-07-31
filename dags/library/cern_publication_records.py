@@ -61,7 +61,7 @@ def library_cern_publication_records_dag():
 
     results = join_and_add_year(counts)
 
-    @sqlalchemy_task(conn_id="superset_qa")
+    @sqlalchemy_task(conn_id="superset")
     def populate_cern_publication_records(results, session, **kwargs):
         record = (
             session.query(LibraryCernPublicationRecords)

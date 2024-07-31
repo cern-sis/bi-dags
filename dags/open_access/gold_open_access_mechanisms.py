@@ -71,7 +71,7 @@ def oa_gold_open_access_mechanisms():
 
     results = join_and_add_year(counts)
 
-    @sqlalchemy_task(conn_id="superset_qa")
+    @sqlalchemy_task(conn_id="superset")
     def populate_golden_open_access(results, session, **kwargs):
         record = (
             session.query(OAGoldenOpenAccess).filter_by(year=results["year"]).first()
