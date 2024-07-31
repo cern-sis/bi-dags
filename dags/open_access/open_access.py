@@ -4,9 +4,11 @@ import open_access.constants as constants
 import open_access.utils as utils
 import pendulum
 from airflow.decorators import dag, task
-from airflow.providers.postgres.operators.postgres import PostgresOperator
+from common.models.open_access.open_access import OAOpenAccess
+from common.operators.sqlalchemy_operator import sqlalchemy_task
 from common.utils import get_total_results_count, request_again_if_failed
 from executor_config import kubernetes_executor_config
+from sqlalchemy.sql import func
 
 
 @dag(
@@ -36,44 +38,39 @@ def oa_dag():
     @task(multiple_outputs=True, executor_config=kubernetes_executor_config)
     def join(values, **kwargs):
         results = reduce(lambda a, b: {**a, **b}, values)
-        results["years"] = kwargs["params"].get("year")
+        results["year"] = kwargs["params"].get("year")
         return results
 
     results = fetch_data_task.expand(
         query=[
-            {"closed": constants.CLOSED_ACCESS},
-            {"bronze": constants.BRONZE_ACCESS},
-            {"green": constants.GREEN_ACCESS},
-            {"gold": constants.GOLD_ACCESS},
+            {"closed_access": constants.CLOSED_ACCESS},
+            {"bronze_open_access": constants.BRONZE_ACCESS},
+            {"green_open_access": constants.GREEN_ACCESS},
+            {"gold_open_access": constants.GOLD_ACCESS},
         ],
     )
     unpacked_results = join(results)
 
-    PostgresOperator(
-        task_id="populate_open_access_table",
-        postgres_conn_id="superset",
-        sql="""
-        INSERT INTO oa_open_access (year, closed_access, bronze_open_access,
-        green_open_access, gold_open_access, created_at, updated_at)
-        VALUES (%(years)s, %(closed)s, %(bronze)s, %(green)s, %(gold)s,
-        CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-        ON CONFLICT (year)
-        DO UPDATE SET
-            closed_access = EXCLUDED.closed_access,
-            bronze_open_access = EXCLUDED.bronze_open_access,
-            green_open_access = EXCLUDED.green_open_access,
-            gold_open_access = EXCLUDED.gold_open_access,
-            updated_at = CURRENT_TIMESTAMP;
-            """,
-        parameters={
-            "years": unpacked_results["years"],
-            "closed": unpacked_results["closed"],
-            "bronze": unpacked_results["bronze"],
-            "green": unpacked_results["green"],
-            "gold": unpacked_results["gold"],
-        },
-        executor_config=kubernetes_executor_config,
-    )
+    @sqlalchemy_task(conn_id="superset_qa")
+    def populate_open_access(results, session, **kwargs):
+        record = session.query(OAOpenAccess).filter_by(year=results["year"]).first()
+        if record:
+            record.closed_access = results["closed_access"]
+            record.bronze_open_access = results["bronze_open_access"]
+            record.green_open_access = results["green_open_access"]
+            record.gold_open_access = results["gold_open_access"]
+            record.updated_at = func.now()
+        else:
+            new_record = OAOpenAccess(
+                year=results["year"],
+                closed_access=results["closed_access"],
+                bronze_open_access=results["bronze_open_access"],
+                green_open_access=results["green_open_access"],
+                gold_open_access=results["gold_open_access"],
+            )
+            session.add(new_record)
+
+    populate_open_access(unpacked_results)
 
 
 OA_dag = oa_dag()

@@ -4,9 +4,13 @@ import library.constants as constants
 import pendulum
 from airflow.decorators import dag, task
 from airflow.providers.http.hooks.http import HttpHook
-from airflow.providers.postgres.operators.postgres import PostgresOperator
+from common.models.library.library_new_items_in_the_institutional_repository import (
+    LibraryNewItemsInTheInstitutionalRepository,
+)
+from common.operators.sqlalchemy_operator import sqlalchemy_task
 from common.utils import get_total_results_count
 from executor_config import kubernetes_executor_config
+from sqlalchemy.sql import func
 from tenacity import retry_if_exception_type, stop_after_attempt
 
 
@@ -56,25 +60,26 @@ def library_new_items_in_the_institutional_repository():
 
     results = join_and_add_year(counts)
 
-    populate_items_in_the_institutional_repository = PostgresOperator(
-        task_id="populate_items_in_the_institutional_repository",
-        postgres_conn_id="superset_qa",
-        sql="""
-        INSERT INTO items_in_the_institutional_repository (year,
-        inspire_arxiv_records, inspire_curators_records, created_at, updated_at)
-        VALUES (%(year)s, %(inspire_arxiv_records)s, %(inspire_curators_records)s,
-        CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-        ON CONFLICT (year)
-        DO UPDATE SET
-            inspire_arxiv_records = EXCLUDED.inspire_arxiv_records,
-            inspire_curators_records = EXCLUDED.inspire_curators_records,
-            updated_at = CURRENT_TIMESTAMP;
-            """,
-        parameters=results,
-        executor_config=kubernetes_executor_config,
-    )
+    @sqlalchemy_task(conn_id="superset_qa")
+    def populate_new_items_in_the_institutional_repository(results, session, **kwargs):
+        record = (
+            session.query(LibraryNewItemsInTheInstitutionalRepository)
+            .filter_by(year=results["year"])
+            .first()
+        )
+        if record:
+            record.inspire_arxiv_records = results["inspire_arxiv_records"]
+            record.inspire_curators_records = results["inspire_curators_records"]
+            record.updated_at = func.now()
+        else:
+            new_record = LibraryNewItemsInTheInstitutionalRepository(
+                year=results["year"],
+                inspire_arxiv_records=results["inspire_arxiv_records"],
+                inspire_curators_records=results["inspire_curators_records"],
+            )
+            session.add(new_record)
 
-    counts >> results >> populate_items_in_the_institutional_repository
+    populate_new_items_in_the_institutional_repository(results)
 
 
 Library_new_items_in_the_institutional_repository = (
