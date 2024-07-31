@@ -27,7 +27,8 @@ def get_count_http_hook(total, url, record_extractor):
         )
         all_ids.extend(record_extractor(response.text))
         records_ids_count = records_ids_count + len(record_extractor(response.text))
-    logging.info(f"In total was found {records_ids_count} golden access records")
+    logging.info(f"In total was found {records_ids_count} records")
+    logging.info(f"Records ids: {all_ids}")
     return records_ids_count
 
 
