@@ -1,17 +1,18 @@
-import logging
-import os
 from functools import reduce
 
 import pendulum
 from airflow.decorators import dag, task
+from airflow.exceptions import AirflowException
+from airflow.providers.http.hooks.http import HttpHook
 from common.models.library.library_cern_publication_records import (
     LibraryCernPublicationRecords,
 )
 from common.operators.sqlalchemy_operator import sqlalchemy_task
-from common.utils import get_total_results_count, request_again_if_failed
+from common.utils import get_total_results_count
 from executor_config import kubernetes_executor_config
-from library.utils import get_url
+from library.utils import get_endpoint
 from sqlalchemy.sql import func
+from tenacity import retry_if_exception_type, stop_after_attempt
 
 
 @dag(
@@ -20,32 +21,45 @@ from sqlalchemy.sql import func
     params={"year": 2023},
 )
 def library_cern_publication_records_dag():
-    @task(executor_config=kubernetes_executor_config)
-    def fetch_data_task(key, **kwargs):
+    @task(multiple_outputs=True, executor_config=kubernetes_executor_config)
+    def generate_params(key, **kwargs):
         year = kwargs["params"].get("year")
-        cds_token = os.environ.get("CDS_TOKEN")
-        if not cds_token:
-            logging.warning("cds token is not set!")
-        type_of_query = key
-        url = get_url(type_of_query, year)
-        data = request_again_if_failed(url=url, cds_token=cds_token)
-        total = get_total_results_count(data.text)
-        return {type_of_query: total}
+        url = get_endpoint(key, year)
+        return {
+            "endpoint": url,
+            "type_of_query": key,
+        }
+
+    @task(executor_config=kubernetes_executor_config)
+    def fetch_count(parameters):
+        http_hook = HttpHook(http_conn_id="cds", method="GET")
+        response = http_hook.run_with_advanced_retry(
+            endpoint=parameters["endpoint"],
+            _retry_args={
+                "stop": stop_after_attempt(3),
+                "retry": retry_if_exception_type(AirflowException),
+            },
+        )
+        count = get_total_results_count(response.text)
+        return {parameters["type_of_query"]: count}
+
+    keys_list = [
+        "publications_total_count",
+        "conference_proceedings_count",
+        "non_journal_proceedings_count",
+    ]
+
+    parameters = generate_params.expand(key=keys_list)
+    counts = fetch_count.expand(parameters=parameters)
 
     @task(multiple_outputs=True, executor_config=kubernetes_executor_config)
-    def join(values, **kwargs):
-        results = reduce(lambda a, b: {**a, **b}, values)
-        results["year"] = kwargs["params"].get("year")
+    def join_and_add_year(counts, **kwargs):
+        year = kwargs["params"].get("year")
+        results = reduce(lambda a, b: {**a, **b}, counts)
+        results["year"] = year
         return results
 
-    results = fetch_data_task.expand(
-        key=[
-            "publications_total_count",
-            "conference_proceedings_count",
-            "non_journal_proceedings_count",
-        ],
-    )
-    unpacked_results = join(results)
+    results = join_and_add_year(counts)
 
     @sqlalchemy_task(conn_id="superset_qa")
     def populate_cern_publication_records(results, session, **kwargs):
@@ -72,7 +86,7 @@ def library_cern_publication_records_dag():
             )
             session.add(new_record)
 
-    populate_cern_publication_records(unpacked_results)
+    populate_cern_publication_records(results)
 
 
 library_cern_publication_records = library_cern_publication_records_dag()

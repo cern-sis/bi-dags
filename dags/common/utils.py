@@ -1,23 +1,7 @@
 import datetime
 import re
 
-import requests
-from common.exceptions import DataFetchError, NotFoundTotalCountOfRecords, WrongInput
-
-
-def request_again_if_failed(url, cds_token=None):
-    if cds_token:
-        header = {"Authorization": f"token {cds_token}"}
-        response = requests.get(url, header)
-    response = requests.get(url)
-    count = 1
-
-    while response.status_code == 502 and count != 10:
-        count = count + 1
-        response = requests.get(url)
-    if response.status_code != 200:
-        raise DataFetchError(url=url, status_code=response.status_code)
-    return response
+from common.exceptions import NotFoundTotalCountOfRecords, WrongInput
 
 
 def get_total_results_count(data):
