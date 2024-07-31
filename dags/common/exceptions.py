@@ -5,11 +5,6 @@ class WrongInput(Exception):
         )
 
 
-class DataFetchError(Exception):
-    def __init__(self, status_code, url):
-        super().__init__(f"Data fetch failure, status_code={status_code}, url={url}")
-
-
 class NotFoundTotalCountOfRecords(Exception):
     def __init__(
         self,

@@ -1,31 +1,40 @@
 import logging
 import math
 
-from common.utils import request_again_if_failed
+from airflow.exceptions import AirflowException
+from airflow.providers.http.hooks.http import HttpHook
 from open_access.parsers import (
     get_golden_access_records_ids,
     get_green_access_records_ids,
 )
+from tenacity import retry_if_exception_type, stop_after_attempt
 
 
-def get_count(total, url, record_extractor):
+def get_count_http_hook(total, url, record_extractor):
+    http_hook = HttpHook(http_conn_id="cds", method="GET")
     iterations = math.ceil(total / 100.0)
     records_ids_count = 0
     for i in range(0, iterations):
         jrec = (i * 100) + 1
         full_url = f"{url}&jrec={jrec}"
-        response = request_again_if_failed(full_url)
+        response = http_hook.run_with_advanced_retry(
+            endpoint=full_url,
+            _retry_args={
+                "stop": stop_after_attempt(3),
+                "retry": retry_if_exception_type(AirflowException),
+            },
+        )
         records_ids_count = records_ids_count + len(record_extractor(response.text))
     logging.info(f"In total was found {records_ids_count} golden access records")
     return records_ids_count
 
 
 def get_golden_access_count(total, url):
-    return get_count(total, url, get_golden_access_records_ids)
+    return get_count_http_hook(total, url, get_golden_access_records_ids)
 
 
 def get_green_access_count(total, url):
-    return get_count(total, url, get_green_access_records_ids)
+    return get_count_http_hook(total, url, get_green_access_records_ids)
 
 
 def get_url(query, current_collection="Published+Articles"):
