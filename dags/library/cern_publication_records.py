@@ -4,10 +4,14 @@ from functools import reduce
 
 import pendulum
 from airflow.decorators import dag, task
-from airflow.providers.postgres.operators.postgres import PostgresOperator
+from common.models.library.library_cern_publication_records import (
+    LibraryCernPublicationRecords,
+)
+from common.operators.sqlalchemy_operator import sqlalchemy_task
 from common.utils import get_total_results_count, request_again_if_failed
 from executor_config import kubernetes_executor_config
 from library.utils import get_url
+from sqlalchemy.sql import func
 
 
 @dag(
@@ -31,7 +35,7 @@ def library_cern_publication_records_dag():
     @task(multiple_outputs=True, executor_config=kubernetes_executor_config)
     def join(values, **kwargs):
         results = reduce(lambda a, b: {**a, **b}, values)
-        results["years"] = kwargs["params"].get("year")
+        results["year"] = kwargs["params"].get("year")
         return results
 
     results = fetch_data_task.expand(
@@ -43,35 +47,32 @@ def library_cern_publication_records_dag():
     )
     unpacked_results = join(results)
 
-    PostgresOperator(
-        task_id="populate_library_cern_publication_records_table",
-        postgres_conn_id="superset",
-        sql="""
-        INSERT INTO library_cern_publication_records (year,
-        publications_total_count, conference_proceedings_count,
-        non_journal_proceedings_count, created_at, updated_at)
-        VALUES (%(years)s, %(publications_total_count)s,
-        %(conference_proceedings_count)s, %(non_journal_proceedings_count)s,
-        CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-        ON CONFLICT (year)
-        DO UPDATE SET
-            publications_total_count = EXCLUDED.publications_total_count,
-            conference_proceedings_count = EXCLUDED.conference_proceedings_count,
-            non_journal_proceedings_count = EXCLUDED.non_journal_proceedings_count,
-            updated_at = CURRENT_TIMESTAMP;
-            """,
-        parameters={
-            "years": unpacked_results["years"],
-            "publications_total_count": unpacked_results["publications_total_count"],
-            "conference_proceedings_count": unpacked_results[
+    @sqlalchemy_task(conn_id="superset_qa")
+    def populate_cern_publication_records(results, session, **kwargs):
+        record = (
+            session.query(LibraryCernPublicationRecords)
+            .filter_by(year=results["year"])
+            .first()
+        )
+        if record:
+            record.publications_total_count = results["publications_total_count"]
+            record.conference_proceedings_count = results[
                 "conference_proceedings_count"
-            ],
-            "non_journal_proceedings_count": unpacked_results[
+            ]
+            record.non_journal_proceedings_count = results[
                 "non_journal_proceedings_count"
-            ],
-        },
-        executor_config=kubernetes_executor_config,
-    )
+            ]
+            record.updated_at = func.now()
+        else:
+            new_record = LibraryCernPublicationRecords(
+                year=results["year"],
+                publications_total_count=results["publications_total_count"],
+                conference_proceedings_count=results["conference_proceedings_count"],
+                non_journal_proceedings_count=results["non_journal_proceedings_count"],
+            )
+            session.add(new_record)
+
+    populate_cern_publication_records(unpacked_results)
 
 
 library_cern_publication_records = library_cern_publication_records_dag()

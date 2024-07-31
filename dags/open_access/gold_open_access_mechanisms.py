@@ -4,9 +4,11 @@ import open_access.constants as constants
 import pendulum
 from airflow.decorators import dag, task
 from airflow.providers.http.hooks.http import HttpHook
-from airflow.providers.postgres.operators.postgres import PostgresOperator
+from common.models.open_access.oa_golden_open_access import OAGoldenOpenAccess
+from common.operators.sqlalchemy_operator import sqlalchemy_task
 from common.utils import get_total_results_count
 from executor_config import kubernetes_executor_config
+from sqlalchemy.sql import func
 from tenacity import retry_if_exception_type, stop_after_attempt
 
 
@@ -68,29 +70,30 @@ def oa_gold_open_access_mechanisms():
 
     results = join_and_add_year(counts)
 
-    populate_golden_open_access = PostgresOperator(
-        task_id="populate_golden_open_access",
-        postgres_conn_id="superset",
-        sql="""
-        INSERT INTO oa_golden_open_access (year, cern_read_and_publish, cern_individual_apcs,
-        scoap3, other, other_collective_models, created_at, updated_at)
-        VALUES (%(year)s, %(cern_read_and_publish)s, %(cern_individual_apcs)s,
-        %(scoap3)s, %(other)s, %(other_collective_models)s,
-        CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-        ON CONFLICT (year)
-        DO UPDATE SET
-            cern_read_and_publish = EXCLUDED.cern_read_and_publish,
-            cern_individual_apcs = EXCLUDED.cern_individual_apcs,
-            scoap3 = EXCLUDED.scoap3,
-            other = EXCLUDED.other,
-            other_collective_models = EXCLUDED.other_collective_models,
-            updated_at = CURRENT_TIMESTAMP;
-            """,
-        parameters=results,
-        executor_config=kubernetes_executor_config,
-    )
+    @sqlalchemy_task(conn_id="superset_qa")
+    def populate_golden_open_access(results, session, **kwargs):
+        record = (
+            session.query(OAGoldenOpenAccess).filter_by(year=results["year"]).first()
+        )
+        if record:
+            record.cern_read_and_publish = results["cern_read_and_publish"]
+            record.cern_individual_apcs = results["cern_individual_apcs"]
+            record.scoap3 = results["scoap3"]
+            record.other = results["other"]
+            record.other_collective_models = results["other_collective_models"]
+            record.updated_at = func.now()
+        else:
+            new_record = OAGoldenOpenAccess(
+                year=results["year"],
+                cern_read_and_publish=results["cern_read_and_publish"],
+                cern_individual_apcs=results["cern_individual_apcs"],
+                scoap3=results["scoap3"],
+                other=results["other"],
+                other_collective_models=results["other_collective_models"],
+            )
+            session.add(new_record)
 
-    counts >> results >> populate_golden_open_access
+    populate_golden_open_access(results)
 
 
 OA_gold_open_access_mechanisms = oa_gold_open_access_mechanisms()

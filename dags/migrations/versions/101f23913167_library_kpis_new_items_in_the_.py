@@ -19,7 +19,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade():
     op.create_table(
-        "items_in_the_institutional_repository",
+        "library_items_in_the_institutional_repository",
         sa.Column("year", sa.Integer, primary_key=True),
         sa.Column("inspire_arxiv_records", sa.Integer, nullable=False),
         sa.Column("inspire_curators_records", sa.Integer, nullable=False),
@@ -29,4 +29,4 @@ def upgrade():
 
 
 def downgrade():
-    op.drop_table("items_in_the_institutional_repository")
+    op.drop_table("library_items_in_the_institutional_repository")
