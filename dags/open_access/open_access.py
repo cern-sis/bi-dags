@@ -78,7 +78,7 @@ def oa_dag():
 
     results = join_and_add_year(counts)
 
-    @sqlalchemy_task(conn_id="superset_qa")
+    @sqlalchemy_task(conn_id="superset")
     def populate_open_access(results, session, **kwargs):
         record = session.query(OAOpenAccess).filter_by(year=results["year"]).first()
         if record:

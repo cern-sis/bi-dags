@@ -60,7 +60,7 @@ def library_new_items_in_the_institutional_repository():
 
     results = join_and_add_year(counts)
 
-    @sqlalchemy_task(conn_id="superset_qa")
+    @sqlalchemy_task(conn_id="superset")
     def populate_new_items_in_the_institutional_repository(results, session, **kwargs):
         record = (
             session.query(LibraryNewItemsInTheInstitutionalRepository)

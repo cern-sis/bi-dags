@@ -81,7 +81,7 @@ Lastly, add the necessary Airflow connections through the UI.
 
 - Navigate to Admin -> Connections in the Airflow UI.
 - Click on "Add" and fill in the details:
-  - Connection Id: `superset_qa`
+  - Connection Id: `superset`
   - Login: `airflow`
   - Database: `airflow`
   - Password: `airflow`
