@@ -51,12 +51,13 @@ def oa_dag():
         )
         type_of_query = parameters["type_of_query"]
         endpoint = parameters["endpoint"]
-        total = get_total_results_count(response.text)
-        if type_of_query == "gold":
-            total = utils.get_golden_access_count(total, endpoint)
-        if type_of_query == "green":
-            total = utils.get_green_access_count(total, endpoint)
         count = get_total_results_count(response.text)
+        if type_of_query == "gold_open_access":
+            total_gold = utils.get_golden_access_count(count, endpoint)
+            return {parameters["type_of_query"]: total_gold}
+        elif type_of_query == "green_open_access":
+            total_green = utils.get_green_access_count(count, endpoint)
+            return {parameters["type_of_query"]: total_green}
         return {parameters["type_of_query"]: count}
 
     queries_objects_list = [

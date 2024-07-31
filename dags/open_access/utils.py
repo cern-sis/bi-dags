@@ -14,6 +14,7 @@ def get_count_http_hook(total, url, record_extractor):
     http_hook = HttpHook(http_conn_id="cds", method="GET")
     iterations = math.ceil(total / 100.0)
     records_ids_count = 0
+    all_ids = []
     for i in range(0, iterations):
         jrec = (i * 100) + 1
         full_url = f"{url}&jrec={jrec}"
@@ -24,7 +25,9 @@ def get_count_http_hook(total, url, record_extractor):
                 "retry": retry_if_exception_type(AirflowException),
             },
         )
+        all_ids.extend(record_extractor(response.text))
         records_ids_count = records_ids_count + len(record_extractor(response.text))
+    print(all_ids)
     logging.info(f"In total was found {records_ids_count} golden access records")
     return records_ids_count
 
