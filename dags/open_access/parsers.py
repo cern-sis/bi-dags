@@ -78,14 +78,15 @@ def parse_subset_green_access(records):
     for record in records:
         datafields_856 = record.findall("datafield[@tag='856'][@ind1='4'][@ind2=' ']")
         datafields_540 = record.findall("datafield/[@tag='540']")
-        if datafields_856 is None:
-            continue
-        if datafields_540 is None:
-            continue
-        is_it_wanted_record_by_856 = is_subset_856_for_green_access(datafields_856)
-        is_it_wanted_record_by_540_preprint = is_subset_540_preprint_green_access(
-            datafields_540
-        )
+        is_it_wanted_record_by_856 = None
+        is_it_wanted_record_by_540_preprint = None
+
+        if datafields_856:
+            is_it_wanted_record_by_856 = is_subset_856_for_green_access(datafields_856)
+        if datafields_540:
+            is_it_wanted_record_by_540_preprint = is_subset_540_preprint_green_access(
+                datafields_540
+            )
         is_it_wanted_record_by_540_publication = (
             not is_subset_540_publication_golden_access(datafields_540)
         )
@@ -104,8 +105,8 @@ def parse_subset_golden_access(records):
     for record in records:
         datafields_540 = record.findall("datafield/[@tag='540']")
         if datafields_540 is None:
-            continue
-        if is_subset_540_publication_golden_access(datafields_540):
+            pass
+        elif is_subset_540_publication_golden_access(datafields_540):
             filtered_records.append(record)
     return filtered_records
 
