@@ -14,7 +14,7 @@ def get_session(conn_id: str):
 def sqlalchemy_task(conn_id: str):
     def decorator(func):
         @task(executor_config=kubernetes_executor_config)
-        def wrapper(*args, **kwargs):
+        def populate_database(*args, **kwargs):
             session = get_session(conn_id)
             try:
                 result = func(*args, session=session, **kwargs)
@@ -26,6 +26,6 @@ def sqlalchemy_task(conn_id: str):
             finally:
                 session.close()
 
-        return wrapper
+        return populate_database
 
     return decorator
