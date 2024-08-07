@@ -70,6 +70,7 @@ airflow standalone
 ### 6. Start Postgres with Docker Compose
 
 If you're using Docker to manage your Postgres database, start the service.
+IMPORTANT: Please add CDS_TOKEN value in Docker compose file
 
 ```sh
 docker-compose -f docker-compose.standalone.yaml up
@@ -188,3 +189,7 @@ This can be done through the API by passing the parameters, or via the UI by ini
      Click the "Trigger" button to start the DAG with the specified parameters
 
 ![migrations_airflow_ui](./migrations_airflow_ui.png)
+
+# Important node regarding Annual Report Dags
+
+Annual Report Dags updates database tables every time it collects new data. If the data was previously collected, it will update the existing entries. The data covers every year from 2004 up to the current year.
