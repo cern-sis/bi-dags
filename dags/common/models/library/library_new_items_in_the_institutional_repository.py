@@ -11,4 +11,4 @@ class LibraryNewItemsInTheInstitutionalRepository(Base):
     inspire_arxiv_records = Column(Float)
     inspire_curators_records = Column(Float)
     created_at = Column(DateTime, default=func.now())
-    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    updated_at = Column(DateTime, default=func.now())
