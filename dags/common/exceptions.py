@@ -17,3 +17,8 @@ class TypeDoesNotExist(Exception):
         super().__init__(
             f"{type_string} this type does not exist, Available types: {all_types}"
         )
+
+
+class VariableValueIsMissing(Exception):
+    def __init__(self, token_name):
+        super().__init__(f"{token_name} value is missing!")

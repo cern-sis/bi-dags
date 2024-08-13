@@ -12,4 +12,4 @@ class LibraryCernPublicationRecords(Base):
     conference_proceedings_count = Column(Float)
     non_journal_proceedings_count = Column(Float)
     created_at = Column(DateTime, default=func.now())
-    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    updated_at = Column(DateTime, default=func.now())

@@ -14,4 +14,4 @@ class OAGoldenOpenAccess(Base):
     other = Column(Float)
     other_collective_models = Column(Float)
     created_at = Column(DateTime, default=func.now())
-    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    updated_at = Column(DateTime, default=func.now())

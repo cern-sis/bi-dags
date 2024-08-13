@@ -13,4 +13,4 @@ class OAOpenAccess(Base):
     green_open_access = Column(Float)
     gold_open_access = Column(Float)
     created_at = Column(DateTime, default=func.now())
-    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    updated_at = Column(DateTime, default=func.now())
