@@ -70,7 +70,7 @@ airflow standalone
 ### 6. Start Postgres with Docker Compose
 
 If you're using Docker to manage your Postgres database, start the service.
-IMPORTANT: Please add CDS_TOKEN value in Docker compose file
+IMPORTANT: Please add CDS_TOKEN and MATOMO_AUTH_TOKEN value in Docker compose file
 
 ```sh
 docker-compose -f docker-compose.standalone.yaml up
