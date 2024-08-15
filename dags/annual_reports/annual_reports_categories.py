@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 import pendulum
 from airflow.decorators import dag, task
@@ -11,7 +11,7 @@ from executor_config import kubernetes_executor_config
 from sqlalchemy.sql import func
 from tenacity import retry_if_exception_type, stop_after_attempt
 
-current_year = datetime.datetime.now().year
+current_year = datetime.now().year
 years = list(range(2004, current_year + 1))
 
 
@@ -37,19 +37,21 @@ def annual_reports_categories_dag():
     @sqlalchemy_task(conn_id="superset")
     def populate_categories_report_count(entry, session, **kwargs):
         for year, subjects in entry.items():
+            full_date_str = f"{year}-01-01"
+            year_date = datetime.strptime(full_date_str, "%Y-%m-%d").date()
             for category, count in subjects.items():
                 record = (
                     session.query(Categories)
-                    .filter_by(category=category, year=year)
+                    .filter_by(category=category, year=year_date)
                     .first()
                 )
                 if record:
                     record.count = int(count)
-                    record.year = int(year)
+                    record.year = year_date
                     record.updated_at = func.now()
                 else:
                     new_record = Categories(
-                        year=int(year),
+                        year=year_date,
                         category=category,
                         count=int(count),
                     )

@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 import pendulum
 from airflow.decorators import dag, task
@@ -11,7 +11,7 @@ from executor_config import kubernetes_executor_config
 from sqlalchemy.sql import func
 from tenacity import retry_if_exception_type, stop_after_attempt
 
-current_year = datetime.datetime.now().year
+current_year = datetime.now().year
 years = list(range(2004, current_year + 1))
 
 
@@ -39,18 +39,20 @@ def annual_reports_publications_dag():
             populate_journal_report_count(journals, year, session)
 
     def populate_publication_report_count(publications, year, session, **kwargs):
-        record = session.query(Publications).filter_by(year=year).first()
+        full_date_str = f"{year}-01-01"
+        year_date = datetime.strptime(full_date_str, "%Y-%m-%d").date()
+        record = session.query(Publications).filter_by(year=year_date).first()
         if record:
             record.publications = publications["publications"]
             record.journals = publications["journals"]
             record.contributions = publications["contributions"]
             record.theses = publications["theses"]
             record.rest = publications["rest"]
-            record.year = year
+            record.year = year_date
             record.updated_at = func.now()
         else:
             new_record = Publications(
-                year=year,
+                year=year_date,
                 publications=publications["publications"],
                 journals=publications["journals"],
                 contributions=publications["contributions"],
@@ -60,18 +62,22 @@ def annual_reports_publications_dag():
             session.add(new_record)
 
     def populate_journal_report_count(journals, year, session, **kwargs):
+        full_date_str = f"{year}-01-01"
+        year_date = datetime.strptime(full_date_str, "%Y-%m-%d").date()
         for journal, count in journals.items():
             record = (
-                session.query(Journals).filter_by(year=year, journal=journal).first()
+                session.query(Journals)
+                .filter_by(year=year_date, journal=journal)
+                .first()
             )
             if record:
                 record.journal = journal
                 record.count = count
-                record.year = year
+                record.year = year_date
                 record.updated_at = func.now()
             else:
                 new_record = Journals(
-                    year=year,
+                    year=year_date,
                     journal=journal,
                     count=count,
                 )
