@@ -10,6 +10,7 @@ from common.models.inspire_matomo.inspire_matomo import MatomoData
 from common.operators.sqlalchemy_operator import sqlalchemy_task
 from executor_config import kubernetes_executor_config
 from inspire_matomo.utils import get_parameters
+from sqlalchemy import func
 from tenacity import retry_if_exception_type, stop_after_attempt
 
 now = datetime.now()
@@ -64,20 +65,18 @@ def inspire_visits_per_day_dag():
 
     @sqlalchemy_task(conn_id="superset")
     def populate_database(visits_per_day, unique_visitors_per_day, session, **kwargs):
+        print(json.loads(visits_per_day))
         visits_per_day_json = json.loads(visits_per_day)
         unique_visitors_per_day_json = json.loads(unique_visitors_per_day)
         date = kwargs["params"].get("date")
+        parsed_date = datetime.strptime(date, "%Y-%m-%d").date()
 
-        record = (
-            session.query(MatomoData)
-            .filter_by(date=visits_per_day_json.get("date"))
-            .first()
-        )
+        record = session.query(MatomoData).filter_by(date=parsed_date).first()
         if record:
-            record.visits = int(visits_per_day_json.visits)
-            record.unique_visitors = int(unique_visitors_per_day_json.unique_visitors)
+            record.visits = int(visits_per_day_json.get("value"))
+            record.unique_visitors = int(unique_visitors_per_day_json.get("value"))
+            record.updated_at = func.now()
         else:
-            parsed_date = datetime.strptime(date, "%Y-%m-%d").date()
             new_record = MatomoData(
                 visits=int(visits_per_day_json.get("value")),
                 unique_visitors=int(unique_visitors_per_day_json.get("value")),

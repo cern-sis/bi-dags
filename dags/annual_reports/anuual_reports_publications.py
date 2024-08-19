@@ -15,7 +15,10 @@ current_year = datetime.now().year
 years = list(range(2004, current_year + 1))
 
 
-@dag(start_date=pendulum.today("UTC").add(days=-1), schedule="@monthly")
+@dag(
+    start_date=pendulum.today("UTC").add(days=-1),
+    schedule="0 0 */15 * *",
+)
 def annual_reports_publications_dag():
     @task(executor_config=kubernetes_executor_config)
     def fetch_publication_report_count(year, **kwargs):
