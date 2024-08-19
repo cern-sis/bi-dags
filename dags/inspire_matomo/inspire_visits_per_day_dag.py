@@ -18,7 +18,7 @@ formatted_date = now.strftime("%Y-%m-%d")
 
 @dag(
     start_date=pendulum.today("UTC").add(days=-1),
-    schedule="@monthly",
+    schedule="@daily",
     params={"period": "day", "date": formatted_date},
 )
 def inspire_visits_per_day_dag():
