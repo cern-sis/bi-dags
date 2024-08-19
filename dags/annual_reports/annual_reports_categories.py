@@ -17,7 +17,7 @@ years = list(range(2004, current_year + 1))
 
 @dag(
     start_date=pendulum.today("UTC").add(days=-1),
-    schedule="@monthly",
+    schedule="0 0 */15 * *",
 )
 def annual_reports_categories_dag():
     @task(executor_config=kubernetes_executor_config)

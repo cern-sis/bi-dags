@@ -12,4 +12,4 @@ class MatomoData(Base):
     visits = Column(Integer)
     unique_visitors = Column(Integer)
     created_at = Column(DateTime, default=func.now())
-    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    updated_at = Column(DateTime, default=func.now())
