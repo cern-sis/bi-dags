@@ -1,5 +1,6 @@
 import open_access.constants as constants
 import pendulum
+import logging
 from airflow.decorators import dag, task
 from common.models.open_access.open_access import OAOpenAccess
 from common.operators.sqlalchemy_operator import sqlalchemy_task
@@ -13,6 +14,7 @@ from open_access.utils import (
 )
 from sqlalchemy.sql import func
 
+logger = logging.getLogger(__name__)
 
 @dag(
     start_date=pendulum.today("UTC").add(days=-1),
@@ -24,18 +26,21 @@ def oa_dag():
     def fetch_closed_access_count(query_object, **kwargs):
         year = kwargs["params"].get("year")
         parameters = generate_params(query_object, year)
+        logger.info(f"Query: {parameters}")
         return fetch_count_from_comments(parameters=parameters)
 
     @task(executor_config=kubernetes_executor_config)
     def fetch_bronze_open_access_count(query_object, closed_access, **kwargs):
         year = kwargs["params"].get("year")
         parameters = generate_params(query_object, year)
+        logger.info(f"Query: {parameters}")
         return fetch_count_from_comments(parameters=parameters, previous=closed_access)
 
     @task(executor_config=kubernetes_executor_config)
     def fetch_gold_open_access_count(query_object, bronze_access, **kwargs):
         year = kwargs["params"].get("year")
         parameters = generate_params(query_object, year)
+        logger.info(f"Query: {parameters}")
         return fetch_count_from_parsed_records(
             parameters=parameters,
             count_function=get_golden_access_count,
@@ -46,6 +51,7 @@ def oa_dag():
     def fetch_green_open_access_count(query_object, gold_access, **kwargs):
         year = kwargs["params"].get("year")
         parameters = generate_params(query_object, year)
+        logger.info(f"Query: {parameters}")
         return fetch_count_from_parsed_records(
             parameters=parameters,
             count_function=get_green_access_count,
