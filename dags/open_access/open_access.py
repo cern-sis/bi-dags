@@ -1,6 +1,7 @@
+import logging
+
 import open_access.constants as constants
 import pendulum
-import logging
 from airflow.decorators import dag, task
 from common.models.open_access.open_access import OAOpenAccess
 from common.operators.sqlalchemy_operator import sqlalchemy_task
@@ -15,6 +16,7 @@ from open_access.utils import (
 from sqlalchemy.sql import func
 
 logger = logging.getLogger(__name__)
+
 
 @dag(
     start_date=pendulum.today("UTC").add(days=-1),

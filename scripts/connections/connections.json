@@ -1,0 +1,12 @@
+{
+  "people_counter": {
+    "conn_type": "http",
+    "description": "",
+    "login": "CHANGE_ME",
+    "password": "CHANGE_ME",
+    "host": "http://ysvic-01651.cern.ch",
+    "port": null,
+    "schema": "",
+    "extra": ""
+  }
+}

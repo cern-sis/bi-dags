@@ -14,6 +14,19 @@ jobs:
   build_test:
     name: Build and Test
     runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: airflow
+          POSTGRES_PASSWORD: airflow
+          POSTGRES_DB: airflow
+        ports:
+          - 5432:5432
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -42,11 +55,16 @@ jobs:
           --name biproject
           --network=host
           -v "$(pwd)"/tests:/opt/airflow/tests
-          --entrypoint pytest
+          -v "$(pwd)"/scripts:/opt/airflow/scripts
+          -e AIRFLOW__CORE__EXECUTOR=CeleryExecutor
+          -e AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@127.0.0.1:5432/airflow
+          -e AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:airflow@127.0.0.1:5432/airflow
+          -e AIRFLOW__CELERY__BROKER_URL=redis://:@127.0.0.1:6379/0
+          -e AIRFLOW__CORE__FERNET_KEY=""
+          -e AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION="true"
+          -e AIRFLOW__CORE__LOAD_EXAMPLES="false"
           $REGISTRY/$IMAGE@${{ steps.build.outputs.image-digest }}
-          tests
-          --cov=./
-          --cov-report=xml
+          bash -c "airflow db init && airflow connections import /opt/airflow/scripts/connections/connections.json && pytest /opt/airflow/tests --cov --cov-report=xml"
 
       - name: Copy test coverage file to host machine
         run: docker cp biproject:/opt/airflow/coverage.xml .
