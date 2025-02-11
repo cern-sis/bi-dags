@@ -9,7 +9,7 @@ interactions:
         Connection:
           - keep-alive
       method: GET
-      uri: http://ysvic-01651.cern.ch/a3dpc/api/export_occupancy/json?start=20241210&end=20241211&resolution=hour
+      uri: http://ysvic-01651.cern.ch/a3dpc/api/export_occupancy/json?start=20241211&end=20241212&resolution=hour
     response:
       body:
         string: '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
@@ -53,13 +53,13 @@ interactions:
         Content-Type:
           - text/html; charset=iso-8859-1
         Date:
-          - Fri, 07 Feb 2025 15:23:56 GMT
+          - Tue, 11 Feb 2025 12:16:32 GMT
         Keep-Alive:
           - timeout=5, max=100
         Server:
           - Apache/2.4.57 (Unix) OpenSSL/1.1.1u
         WWW-Authenticate:
-          - Digest realm="AXIS_B8A44F2F0694", nonce="w1p18o4tBgA=d3233f355723e2ef441854b4bc41a36e159a98b2",
+          - Digest realm="AXIS_B8A44F2F0694", nonce="0JKdy9wtBgA=45b5cfd51ecf82ef83b5067950117e4ea87653da",
             algorithm=MD5, qop="auth"
         X-Content-Type-Options:
           - nosniff
@@ -80,27 +80,27 @@ interactions:
         Connection:
           - keep-alive
       method: GET
-      uri: http://ysvic-01651.cern.ch/a3dpc/api/export_occupancy/json?start=20241210&end=20241211&resolution=hour
+      uri: http://ysvic-01651.cern.ch/a3dpc/api/export_occupancy/json?start=20241211&end=20241212&resolution=hour
     response:
       body:
         string:
-          '{"data":[{"start":"2024-12-10 00:00:00","end":"2024-12-10 01:00:00","peak":2},{"start":"2024-12-10
-          01:00:00","end":"2024-12-10 02:00:00","peak":1},{"start":"2024-12-10 02:00:00","end":"2024-12-10
-          03:00:00","peak":1},{"start":"2024-12-10 03:00:00","end":"2024-12-10 04:00:00","peak":0},{"start":"2024-12-10
-          04:00:00","end":"2024-12-10 05:00:00","peak":0},{"start":"2024-12-10 05:00:00","end":"2024-12-10
-          06:00:00","peak":0},{"start":"2024-12-10 06:00:00","end":"2024-12-10 07:00:00","peak":0},{"start":"2024-12-10
-          07:00:00","end":"2024-12-10 08:00:00","peak":3},{"start":"2024-12-10 08:00:00","end":"2024-12-10
-          09:00:00","peak":3},{"start":"2024-12-10 09:00:00","end":"2024-12-10 10:00:00","peak":7},{"start":"2024-12-10
-          10:00:00","end":"2024-12-10 11:00:00","peak":13},{"start":"2024-12-10 11:00:00","end":"2024-12-10
-          12:00:00","peak":16},{"start":"2024-12-10 12:00:00","end":"2024-12-10 13:00:00","peak":12},{"start":"2024-12-10
-          13:00:00","end":"2024-12-10 14:00:00","peak":22},{"start":"2024-12-10 14:00:00","end":"2024-12-10
-          15:00:00","peak":27},{"start":"2024-12-10 15:00:00","end":"2024-12-10 16:00:00","peak":31},{"start":"2024-12-10
-          16:00:00","end":"2024-12-10 17:00:00","peak":37},{"start":"2024-12-10 17:00:00","end":"2024-12-10
-          18:00:00","peak":35},{"start":"2024-12-10 18:00:00","end":"2024-12-10 19:00:00","peak":19},{"start":"2024-12-10
-          19:00:00","end":"2024-12-10 20:00:00","peak":12},{"start":"2024-12-10 20:00:00","end":"2024-12-10
-          21:00:00","peak":9},{"start":"2024-12-10 21:00:00","end":"2024-12-10 22:00:00","peak":9},{"start":"2024-12-10
-          22:00:00","end":"2024-12-10 23:00:00","peak":5},{"start":"2024-12-10 23:00:00","end":"2024-12-11
-          00:00:00","peak":4}]}'
+          '{"data":[{"start":"2024-12-11 00:00:00","end":"2024-12-11 01:00:00","peak":4},{"start":"2024-12-11
+          01:00:00","end":"2024-12-11 02:00:00","peak":4},{"start":"2024-12-11 02:00:00","end":"2024-12-11
+          03:00:00","peak":4},{"start":"2024-12-11 03:00:00","end":"2024-12-11 04:00:00","peak":0},{"start":"2024-12-11
+          04:00:00","end":"2024-12-11 05:00:00","peak":0},{"start":"2024-12-11 05:00:00","end":"2024-12-11
+          06:00:00","peak":0},{"start":"2024-12-11 06:00:00","end":"2024-12-11 07:00:00","peak":0},{"start":"2024-12-11
+          07:00:00","end":"2024-12-11 08:00:00","peak":2},{"start":"2024-12-11 08:00:00","end":"2024-12-11
+          09:00:00","peak":7},{"start":"2024-12-11 09:00:00","end":"2024-12-11 10:00:00","peak":17},{"start":"2024-12-11
+          10:00:00","end":"2024-12-11 11:00:00","peak":27},{"start":"2024-12-11 11:00:00","end":"2024-12-11
+          12:00:00","peak":30},{"start":"2024-12-11 12:00:00","end":"2024-12-11 13:00:00","peak":35},{"start":"2024-12-11
+          13:00:00","end":"2024-12-11 14:00:00","peak":45},{"start":"2024-12-11 14:00:00","end":"2024-12-11
+          15:00:00","peak":53},{"start":"2024-12-11 15:00:00","end":"2024-12-11 16:00:00","peak":45},{"start":"2024-12-11
+          16:00:00","end":"2024-12-11 17:00:00","peak":46},{"start":"2024-12-11 17:00:00","end":"2024-12-11
+          18:00:00","peak":43},{"start":"2024-12-11 18:00:00","end":"2024-12-11 19:00:00","peak":31},{"start":"2024-12-11
+          19:00:00","end":"2024-12-11 20:00:00","peak":25},{"start":"2024-12-11 20:00:00","end":"2024-12-11
+          21:00:00","peak":17},{"start":"2024-12-11 21:00:00","end":"2024-12-11 22:00:00","peak":18},{"start":"2024-12-11
+          22:00:00","end":"2024-12-11 23:00:00","peak":16},{"start":"2024-12-11 23:00:00","end":"2024-12-12
+          00:00:00","peak":15}]}'
       headers:
         Connection:
           - Keep-Alive
@@ -113,7 +113,7 @@ interactions:
             https://*.google-analytics.com https://*.googletagmanager.com https://*.axis.com
             data: blob:; media-src 'self' mediastream: blob:; object-src 'none'"
         Date:
-          - Fri, 07 Feb 2025 15:23:55 GMT
+          - Tue, 11 Feb 2025 12:16:31 GMT
         Keep-Alive:
           - timeout=5, max=100
         Server:
@@ -125,9 +125,9 @@ interactions:
         X-XSS-Protection:
           - 1; mode=block
         content-disposition:
-          - attachment; filename*=utf-8''YSVIC-01651%20ENTRANCE%201_20241210T000000-20241211T000000.json
+          - attachment; filename*=utf-8''YSVIC-01651%20ENTRANCE%201_20241211T000000-20241212T000000.json
         content-length:
-          - "1676"
+          - "1681"
         content-type:
           - application/json
       status:
