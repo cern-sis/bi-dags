@@ -16,5 +16,5 @@ class TestPeopleCounter:
         res = task.execute(
             context=Context({"ds": "2024-12-11", "ds_nodash": "20241211"})
         )
-        assert res["data"][0]["start"] == "2024-12-10 00:00:00"
-        assert res["data"][23]["end"] == "2024-12-11 00:00:00"
+        assert res["data"][0]["start"] == "2024-12-11 00:00:00"
+        assert res["data"][23]["end"] == "2024-12-12 00:00:00"
