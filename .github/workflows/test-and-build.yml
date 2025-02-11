@@ -38,7 +38,7 @@ jobs:
 
       - name: Build Image
         id: build
-        uses: cern-sis/gh-workflows/.github/actions/docker-build@v6
+        uses: cern-sis/gh-workflows/.github/actions/docker-build@v6.5
         with:
           registry: ${{ env.REGISTRY }}
           image: ${{ env.IMAGE }}
@@ -80,5 +80,5 @@ jobs:
         with:
           repo: cern-sis/kubernetes-airflow
           event-type: update
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE }}@${{ steps.build.outputs.image-digest }}
+          images: ${{ fromJSON(steps.build.outputs.json).tags[1] }}
           token: ${{ secrets.PAT_FIRE_EVENTS_ON_CERN_SIS_KUBERNETES }}
