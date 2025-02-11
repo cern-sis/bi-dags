@@ -11,7 +11,8 @@ from tenacity import retry_if_exception_type, stop_after_attempt
 
 @dag(
     start_date=datetime.datetime(2024, 11, 28),
-    schedule="@daily",
+    schedule="0 2 * * *",
+    max_active_runs=5,
     catchup=True,
     tags=["library"],
 )
@@ -21,11 +22,10 @@ def library_people_counter_dag():
     @task()
     def fetch_occupancy(**context):
 
-        start_date = ds_format(ds_add(context["ds"], -1), "%Y-%m-%d", "%Y%m%d")
-
+        end_date = ds_format(ds_add(context["ds"], 1), "%Y-%m-%d", "%Y%m%d")
         params = {
-            "start": start_date,
-            "end": context["ds_nodash"],
+            "start": context["ds_nodash"],
+            "end": end_date,
             "resolution": "hour",
         }
 
@@ -47,6 +47,9 @@ def library_people_counter_dag():
 
         records = []
         for result in results["data"]:
+            if result["peak"] is None:
+                continue
+
             records.append(
                 LibraryPeopleCounter(
                     date=result["start"],
