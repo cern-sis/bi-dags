@@ -10,4 +10,6 @@ class LibraryPeopleCounter(Base):
     id = Column(Integer, autoincrement=True, primary_key=True)
     date = Column(DateTime, unique=True, nullable=False)
     occupancy = Column(Integer, nullable=False)
+    people_in = Column(Integer, nullable=False)
+    people_out = Column(Integer, nullable=False)
     created_at = Column(DateTime, default=func.now())
