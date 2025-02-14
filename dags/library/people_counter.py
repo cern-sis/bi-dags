@@ -19,46 +19,70 @@ from tenacity import retry_if_exception_type, stop_after_attempt
 def library_people_counter_dag():
     """A DAG to fetch and store library occupancy data"""
 
-    @task()
-    def fetch_occupancy(**context):
+    http_hook = HttpHook(
+        http_conn_id="people_counter", auth_type=HTTPDigestAuth, method="GET"
+    )
 
+    @task()
+    def set_params(**context):
         end_date = ds_format(ds_add(context["ds"], 1), "%Y-%m-%d", "%Y%m%d")
-        params = {
+        return {
             "start": context["ds_nodash"],
             "end": end_date,
             "resolution": "hour",
         }
 
-        http_hook = HttpHook(
-            http_conn_id="people_counter", auth_type=HTTPDigestAuth, method="GET"
-        )
+    @task()
+    def fetch_occupancy(query_params):
+
         response = http_hook.run_with_advanced_retry(
             endpoint="/a3dpc/api/export_occupancy/json",
             _retry_args={
                 "stop": stop_after_attempt(3),
                 "retry": retry_if_exception_type(Exception),
             },
-            data=params,
+            data=query_params,
+        )
+        return response.json()
+
+    @task()
+    def fetch_inout(query_params):
+
+        response = http_hook.run_with_advanced_retry(
+            endpoint="/a3dpc/api/export/json",
+            _retry_args={
+                "stop": stop_after_attempt(3),
+                "retry": retry_if_exception_type(Exception),
+            },
+            data=query_params,
         )
         return response.json()
 
     @sqlalchemy_task(conn_id="superset")
-    def populate_occupancy(results, session, **context):
+    def populate_database(results_occupancy, results_inout, session, **context):
 
         records = []
-        for result in results["data"]:
-            if result["peak"] is None:
+
+        for occupancy, inout in zip(results_occupancy["data"], results_inout["data"]):
+            if not occupancy["peak"] and not inout["in"] and not inout["out"]:
                 continue
+
+            occupancy["peak"] = occupancy["peak"] or 0
+            inout["in"] = inout["in"] or 0
+            inout["out"] = inout["out"] or 0
 
             records.append(
                 LibraryPeopleCounter(
-                    date=result["start"],
-                    occupancy=result["peak"],
+                    date=occupancy["start"],
+                    occupancy=occupancy["peak"],
+                    people_in=inout["in"],
+                    people_out=inout["out"],
                 )
             )
             session.add_all(records)
 
-    populate_occupancy(fetch_occupancy())
+    params = set_params()
+    populate_database(fetch_occupancy(params), fetch_inout(params))
 
 
 library_people_counter_dag()
