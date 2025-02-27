@@ -84,7 +84,7 @@ def annual_reports_publications_dag():
                     journal=journal,
                     count=count,
                 )
-            session.add(new_record)
+                session.add(new_record)
 
     previous_task = None
     for year in years:
