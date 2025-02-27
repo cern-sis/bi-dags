@@ -1,5 +1,5 @@
 from datetime import datetime
-
+import logging
 import pendulum
 from airflow.decorators import dag, task
 from airflow.exceptions import AirflowException
@@ -14,6 +14,7 @@ from tenacity import retry_if_exception_type, stop_after_attempt
 current_year = datetime.now().year
 years = list(range(2004, current_year + 1))
 
+logger = logging.getLogger(__name__)
 
 @dag(
     start_date=pendulum.today("UTC").add(days=-1),
@@ -24,6 +25,8 @@ def annual_reports_categories_dag():
     def fetch_categories_report_count(year, **kwargs):
         endpoint = get_endpoint(year=year, key="subjects")
         http_hook = HttpHook(http_conn_id="cds", method="GET")
+        logger.info(f"Getting annual reports categtegories {year}: {endpoint}")
+        
         response = http_hook.run_with_advanced_retry(
             endpoint=endpoint,
             _retry_args={
