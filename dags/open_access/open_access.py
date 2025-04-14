@@ -6,7 +6,10 @@ from airflow.decorators import dag, task
 from common.models.open_access.open_access import OAOpenAccess
 from common.operators.sqlalchemy_operator import sqlalchemy_task
 from executor_config import kubernetes_executor_config
-from open_access.utils import fetch_count_from_comments, get_url
+from open_access.utils import (
+    fetch_count_from_comments,
+    get_url,
+)
 from sqlalchemy.sql import func
 
 logger = logging.getLogger(__name__)
@@ -18,6 +21,7 @@ logger = logging.getLogger(__name__)
     params={"year": 2023},
 )
 def oa_dag():
+
     @task(executor_config=kubernetes_executor_config)
     def fetch_closed_access_count(query, **kwargs):
         year = kwargs["params"].get("year")
@@ -59,15 +63,14 @@ def oa_dag():
         return fetch_count_from_comments(endpoint)
 
     closed_access = fetch_closed_access_count(constants.CLOSED_OPEN_ACCESS_QUERY)
-    bronze_access = fetch_bronze_access_count(constants.BRONZE_OPEN_ACCESS_QUERY)
-    gold_access = fetch_gold_access_count(constants.GOLD_OPEN_ACCESS_QUERY)
-    green_access = fetch_green_access_count(constants.GREEN_OPEN_ACCESS_QUERY)
-
+    bronze_open_access = fetch_bronze_access_count(constants.BRONZE_OPEN_ACCESS_QUERY)
+    gold_open_access = fetch_gold_access_count(constants.GOLD_OPEN_ACCESS_QUERY)
+    green_open_access = fetch_green_access_count(constants.GREEN_OPEN_ACCESS_QUERY)
     results = {
         "closed_access": closed_access,
-        "bronze_access": bronze_access,
-        "gold_access": gold_access,
-        "green_access": green_access,
+        "bronze_open_access": bronze_open_access,
+        "gold_open_access": gold_open_access,
+        "green_open_access": green_open_access,
     }
 
     @task(executor_config=kubernetes_executor_config)
