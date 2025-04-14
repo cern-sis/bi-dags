@@ -7,7 +7,7 @@ from airflow.exceptions import AirflowException
 from airflow.providers.http.hooks.http import HttpHook
 from common.models.open_access.oa_golden_open_access import OAGoldenOpenAccess
 from common.operators.sqlalchemy_operator import sqlalchemy_task
-from common.utils import get_total_results_count
+from common.utils import get_total_results_count, get_url
 from executor_config import kubernetes_executor_config
 from sqlalchemy.sql import func
 from tenacity import retry_if_exception_type, stop_after_attempt
@@ -16,27 +16,21 @@ from tenacity import retry_if_exception_type, stop_after_attempt
 @dag(
     start_date=pendulum.today("UTC").add(days=-1),
     schedule_interval="@monthly",
-    params={"year": 2023},
+    params={"year": pendulum.now("UTC").year},
 )
 def oa_gold_open_access_mechanisms():
     @task(multiple_outputs=True, executor_config=kubernetes_executor_config)
     def generate_params(query_object, **kwargs):
         year = kwargs["params"].get("year")
-        current_collection = "Published+Articles"
-        golden_access_base_query = (
-            r"(affiliation:CERN+or+595:'For+annual+report')"
-            + rf"and+year:{year}+not+980:ConferencePaper+"
-            + r"not+980:BookChapter+not+595:'Not+for+annual+report"
-        )
-        type_of_query = [*query_object][0]
-        query = rf"{golden_access_base_query}+{query_object[type_of_query]}"
-
-        return {
-            "endpoint": rf"search?ln=en&cc={current_collection}&p={query}"
-            + r"&action_search=Search&op1=a&m1=a&p1=&f1=&c="
-            + r"Published+Articles&c=&sf=&so=d&rm=&rg=100&sc=0&of=xm",
-            "type_of_query": type_of_query,
-        }
+        params = []
+        for key, query in query_object.items():
+            params.append(
+                {
+                    "endpoint": get_url(query.format(year=year)),
+                    "type_of_query": key,
+                }
+            )
+        return params
 
     @task(executor_config=kubernetes_executor_config)
     def fetch_count(parameters):
@@ -52,11 +46,11 @@ def oa_gold_open_access_mechanisms():
         return {parameters["type_of_query"]: count}
 
     queries_objects_list = [
-        {"cern_read_and_publish": constants.CERN_READ_AND_PUBLISH},
-        {"cern_individual_apcs": constants.CERN_INDIVIDUAL_APCS},
-        {"scoap3": constants.SCOAP3},
-        {"other": constants.OTHER},
-        {"other_collective_models": constants.OTHER_COLLECTIVE_MODELS},
+        {"cern_read_and_publish": constants.CERN_READ_AND_PUBLISH_QUERY},
+        {"cern_individual_apcs": constants.CERN_INDIVIDUAL_APCS_QUERY},
+        {"scoap3": constants.SCOAP3_QUERY},
+        {"other": constants.OTHER_QUERY},
+        {"other_collective_models": constants.OTHER_COLLECTIVE_MODELS_QUERY},
     ]
 
     parameters = generate_params.expand(query_object=queries_objects_list)

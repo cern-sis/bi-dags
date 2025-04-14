@@ -102,5 +102,4 @@ def oa_dag():
 
     populate_open_access(results)
 
-
 OA_dag = oa_dag()
