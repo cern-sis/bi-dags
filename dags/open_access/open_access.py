@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 @dag(
     start_date=pendulum.today("UTC").add(days=-1),
     schedule="@monthly",
-    params={"year": 2023},
+    params={"year": pendulum.now("UTC").year},
 )
 def oa_dag():
 
