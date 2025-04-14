@@ -43,7 +43,7 @@ def get_green_access_count(total, url):
 
 def get_url(query, current_collection="Published+Articles"):
     url = (
-        rf"https://cds.cern.ch/search?ln=en&cc={current_collection}&p={query}"
+        rf"/search?ln=en&cc={current_collection}&p={query}"
         + r"&action_search=Search&op1=a&m1=a&p1=&f1=&c="
         + r"Published+Articles&c=&sf=&so=d&rm=&rg=1&sc=0&of=xm"
     )
