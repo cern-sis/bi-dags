@@ -45,23 +45,22 @@ def get_url(query, current_collection="Published+Articles"):
     url = (
         rf"https://cds.cern.ch/search?ln=en&cc={current_collection}&p={query}"
         + r"&action_search=Search&op1=a&m1=a&p1=&f1=&c="
-        + r"Published+Articles&c=&sf=&so=d&rm=&rg=100&sc=0&of=xm"
+        + r"Published+Articles&c=&sf=&so=d&rm=&rg=1&sc=0&of=xm"
     )
     return url
 
 
-def fetch_count_from_comments(parameters, previous={}):
+def fetch_count_from_comments(endpoint):
     http_hook = HttpHook(http_conn_id="cds", method="GET")
     response = http_hook.run_with_advanced_retry(
-        endpoint=parameters["endpoint"],
+        endpoint=endpoint,
         _retry_args={
             "stop": stop_after_attempt(3),
             "retry": retry_if_exception_type(AirflowException),
         },
     )
     count = get_total_results_count(response.text)
-    previous.update({parameters["type_of_query"]: count})
-    return previous
+    return count
 
 
 def fetch_count_from_parsed_records(

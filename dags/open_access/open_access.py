@@ -6,13 +6,7 @@ from airflow.decorators import dag, task
 from common.models.open_access.open_access import OAOpenAccess
 from common.operators.sqlalchemy_operator import sqlalchemy_task
 from executor_config import kubernetes_executor_config
-from open_access.utils import (
-    fetch_count_from_comments,
-    fetch_count_from_parsed_records,
-    generate_params,
-    get_golden_access_count,
-    get_green_access_count,
-)
+from open_access.utils import fetch_count_from_comments, get_url
 from sqlalchemy.sql import func
 
 logger = logging.getLogger(__name__)
@@ -25,61 +19,64 @@ logger = logging.getLogger(__name__)
 )
 def oa_dag():
     @task(executor_config=kubernetes_executor_config)
-    def fetch_closed_access_count(query_object, **kwargs):
+    def fetch_closed_access_count(query, **kwargs):
         year = kwargs["params"].get("year")
-        parameters = generate_params(query_object, year)
-        logger.info(f"Query: {parameters}")
-        return fetch_count_from_comments(parameters=parameters)
+        query = query.format(year=year)
+        logger.info(f"Query: {query}")
+        endpoint = get_url(query)
+
+        logger.info(f"Endpoint: {endpoint}")
+        return fetch_count_from_comments(endpoint)
 
     @task(executor_config=kubernetes_executor_config)
-    def fetch_bronze_open_access_count(query_object, closed_access, **kwargs):
+    def fetch_bronze_access_count(query, **kwargs):
         year = kwargs["params"].get("year")
-        parameters = generate_params(query_object, year)
-        logger.info(f"Query: {parameters}")
-        return fetch_count_from_comments(parameters=parameters, previous=closed_access)
+        query = query.format(year=year)
+        logger.info(f"Query: {query}")
+        endpoint = get_url(query)
+
+        logger.info(f"Endpoint: {endpoint}")
+        return fetch_count_from_comments(endpoint)
 
     @task(executor_config=kubernetes_executor_config)
-    def fetch_gold_open_access_count(query_object, bronze_access, **kwargs):
+    def fetch_gold_access_count(query, **kwargs):
         year = kwargs["params"].get("year")
-        parameters = generate_params(query_object, year)
-        logger.info(f"Query: {parameters}")
-        return fetch_count_from_parsed_records(
-            parameters=parameters,
-            count_function=get_golden_access_count,
-            previous=bronze_access,
-        )
+        query = query.format(year=year)
+        logger.info(f"Query: {query}")
+        endpoint = get_url(query)
+
+        logger.info(f"Endpoint: {endpoint}")
+        return fetch_count_from_comments(endpoint)
 
     @task(executor_config=kubernetes_executor_config)
-    def fetch_green_open_access_count(query_object, gold_access, **kwargs):
+    def fetch_green_access_count(query, **kwargs):
         year = kwargs["params"].get("year")
-        parameters = generate_params(query_object, year)
-        logger.info(f"Query: {parameters}")
-        return fetch_count_from_parsed_records(
-            parameters=parameters,
-            count_function=get_green_access_count,
-            previous=gold_access,
-        )
+        query = query.format(year=year)
+        logger.info(f"Query: {query}")
+        endpoint = get_url(query)
 
-    closed_access = fetch_closed_access_count(
-        {"closed_access": constants.CLOSED_ACCESS}
-    )
-    closed_bronze_access = fetch_bronze_open_access_count(
-        {"bronze_open_access": constants.BRONZE_ACCESS}, closed_access
-    )
-    closed_bronze_gold_access = fetch_gold_open_access_count(
-        {"gold_open_access": constants.GOLD_ACCESS}, closed_bronze_access
-    )
-    closed_bronze_gold_green_access = fetch_green_open_access_count(
-        {"green_open_access": constants.GREEN_ACCESS}, closed_bronze_gold_access
-    )
+        logger.info(f"Endpoint: {endpoint}")
+        return fetch_count_from_comments(endpoint)
+
+    closed_access = fetch_closed_access_count(constants.CLOSED_OPEN_ACCESS_QUERY)
+    bronze_access = fetch_bronze_access_count(constants.BRONZE_OPEN_ACCESS_QUERY)
+    gold_access = fetch_gold_access_count(constants.GOLD_OPEN_ACCESS_QUERY)
+    green_access = fetch_green_access_count(constants.GREEN_OPEN_ACCESS_QUERY)
+
+    results = {
+        "closed_access": closed_access,
+        "bronze_access": bronze_access,
+        "gold_access": gold_access,
+        "green_access": green_access,
+    }
 
     @task(executor_config=kubernetes_executor_config)
-    def add_year(closed_bronze_gold_green_access, **kwargs):
+    def add_year(results, **kwargs):
         year = kwargs["params"].get("year")
-        closed_bronze_gold_green_access["year"] = year
-        return closed_bronze_gold_green_access
+        results["year"] = year
+        return results
 
-    results = add_year(closed_bronze_gold_green_access)
+    results = add_year(results)
 
     @sqlalchemy_task(conn_id="superset")
     def populate_open_access(results, session, **kwargs):
