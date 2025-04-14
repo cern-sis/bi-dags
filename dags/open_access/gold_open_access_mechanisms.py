@@ -7,7 +7,8 @@ from airflow.exceptions import AirflowException
 from airflow.providers.http.hooks.http import HttpHook
 from common.models.open_access.oa_golden_open_access import OAGoldenOpenAccess
 from common.operators.sqlalchemy_operator import sqlalchemy_task
-from common.utils import get_total_results_count, get_url
+from common.utils import get_total_results_count
+from open_access.utils import get_url
 from executor_config import kubernetes_executor_config
 from sqlalchemy.sql import func
 from tenacity import retry_if_exception_type, stop_after_attempt
