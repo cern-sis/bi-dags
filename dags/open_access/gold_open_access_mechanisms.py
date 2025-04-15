@@ -23,13 +23,13 @@ def oa_gold_open_access_mechanisms():
     @task(multiple_outputs=True, executor_config=kubernetes_executor_config)
     def generate_params(query_object, **kwargs):
         year = kwargs["params"].get("year")
-        params = {}
-        for key, query in query_object.items():
-            params[key] = {
-                "endpoint": get_url(query.format(year=year)),
-                "type_of_query": key,
-            }
-        return params
+
+        key, query = next(iter(query_object.items()))
+        return {
+            "endpoint": get_url(query.format(year=year)),
+            "type_of_query": key,
+        }
+
 
     @task(executor_config=kubernetes_executor_config)
     def fetch_count(parameters):
