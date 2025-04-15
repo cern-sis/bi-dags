@@ -1,3 +1,4 @@
+import logging
 from functools import reduce
 
 import open_access.constants as constants
@@ -13,6 +14,7 @@ from executor_config import kubernetes_executor_config
 from sqlalchemy.sql import func
 from tenacity import retry_if_exception_type, stop_after_attempt
 
+logger = logging.getLogger(__name__)
 
 @dag(
     start_date=pendulum.today("UTC").add(days=-1),
@@ -41,7 +43,9 @@ def oa_gold_open_access_mechanisms():
                 "retry": retry_if_exception_type(AirflowException),
             },
         )
+        logger.info(f"URL for {parameters['type_of_query']}: {parameters['endpoint']}")
         count = get_total_results_count(response.text)
+        logger.info(f"Count for {parameters['type_of_query']}: {count}")
         return {parameters["type_of_query"]: count}
 
     queries_objects_list = [
