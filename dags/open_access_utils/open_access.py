@@ -6,10 +6,7 @@ from airflow.decorators import dag, task
 from common.models.open_access.open_access import OAOpenAccess
 from common.operators.sqlalchemy_operator import sqlalchemy_task
 from executor_config import kubernetes_executor_config
-from open_access.utils import (
-    fetch_count_from_comments,
-    get_url,
-)
+from open_access_utils.utils import fetch_count_from_comments, get_url
 from sqlalchemy.sql import func
 
 logger = logging.getLogger(__name__)
@@ -21,7 +18,6 @@ logger = logging.getLogger(__name__)
     params={"year": pendulum.now("UTC").year},
 )
 def oa_dag():
-
     @task(executor_config=kubernetes_executor_config)
     def fetch_closed_access_count(query, **kwargs):
         year = kwargs["params"].get("year")
@@ -101,5 +97,6 @@ def oa_dag():
             session.add(new_record)
 
     populate_open_access(results)
+
 
 OA_dag = oa_dag()
