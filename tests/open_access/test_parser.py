@@ -1,4 +1,4 @@
-from open_access.parsers import (
+from open_access_utils.parsers import (
     get_golden_access_records_ids,
     get_green_access_records_ids,
     is_subset_540_preprint_green_access,
