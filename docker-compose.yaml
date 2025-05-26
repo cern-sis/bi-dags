@@ -58,6 +58,7 @@ x-airflow-common: &airflow-common
     AIRFLOW__CORE__FERNET_KEY: ""
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
     AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_USERS: "admin:admin"
     AIRFLOW__API__AUTH_BACKENDS: "airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session"
     AIRFLOW_CONN_CDS: "http://cds.cern.ch"
     AIRFLOW_CONN_SUPERSET: "postgresql://bi_local:bi_local@postgres_local:5432/bi_local"
@@ -75,6 +76,7 @@ x-airflow-common: &airflow-common
     - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
     - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
     - ${AIRFLOW_PROJ_DIR:-.}/tests:/opt/airflow/tests
+    - ${AIRFLOW_PROJ_DIR:-.}/scripts:/opt/airflow/scripts
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on: &airflow-common-depends-on
     redis:
@@ -134,9 +136,18 @@ services:
       start_period: 30s
     restart: always
 
-  airflow-webserver:
+  airflow-bootstrap:
     <<: *airflow-common
-    command: webserver
+    depends_on:
+      airflow-api-server:
+        condition: service_healthy
+    command: >
+      bash -c "/entrypoint airflow connections import ./scripts/connections/connections.json"
+    restart: "no"
+
+  airflow-api-server:
+    <<: *airflow-common
+    command: api-server
     ports:
       - "8080:8080"
     healthcheck:
@@ -284,6 +295,14 @@ services:
       - bash
       - -c
       - airflow
+
+  airflow-dag-processor:
+    <<: *airflow-common
+    command: dag-processor
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
 
   # You can enable flower by adding "--profile flower" option e.g. docker-compose --profile flower up
   # or by explicitly targeted on the command line e.g. docker-compose up flower.

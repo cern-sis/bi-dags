@@ -104,30 +104,7 @@ docker-compose up
 
 All the required environment variables are already configured in the `docker-compose.yml` file.
 
-### Creating a User in Airflow
-
-Before logging into the Airflow UI, you need to create a user. Follow these steps to create a user in the Airflow web container from the command line:
-
-1. Ensure the Airflow services are running.
-2. Access the Airflow web container by running:
-
-```sh
-docker-compose exec airflow-web bash
-```
-
-3. Create a new Airflow user with the following command (replace `<username>`, `<password>`, `<firstname>`, `<lastname>`, and `<email>` with your desired values):
-
-```sh
-airflow users create     --username <username>     --password <password>     --firstname <firstname>     --lastname <lastname>     --role Admin     --email <email>
-```
-
-Example:
-
-```sh
-airflow users create     --username admin     --password admin     --firstname Admin     --lastname User     --role Admin     --email admin@example.com
-```
-
-After creating the user, you can log in to the Airflow UI with the credentials you specified.
+The user is `admin` the password is auto-generated and logged in the `webserver`
 
 ## Database Migrations
 

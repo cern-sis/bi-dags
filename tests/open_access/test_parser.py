@@ -1,3 +1,4 @@
+from airflow.models import DagBag  # noqa: F401
 from open_access.parsers import (
     get_golden_access_records_ids,
     get_green_access_records_ids,
