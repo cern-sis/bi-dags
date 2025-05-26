@@ -1,4 +1,4 @@
-FROM registry.cern.ch/cern-sis/base-images/apache/airflow:2.9.3-python3.11
+FROM registry.cern.ch/cern-sis/base-images/apache/airflow:3.0.1-python3.11
 
 ENV PYTHONBUFFERED=0
 ENV AIRFLOW__LOGGING__LOGGING_LEVEL=INFO

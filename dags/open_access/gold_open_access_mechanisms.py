@@ -9,16 +9,17 @@ from airflow.providers.http.hooks.http import HttpHook
 from common.models.open_access.oa_golden_open_access import OAGoldenOpenAccess
 from common.operators.sqlalchemy_operator import sqlalchemy_task
 from common.utils import get_total_results_count
-from open_access.utils import get_url
 from executor_config import kubernetes_executor_config
+from open_access.utils import get_url
 from sqlalchemy.sql import func
 from tenacity import retry_if_exception_type, stop_after_attempt
 
 logger = logging.getLogger(__name__)
 
+
 @dag(
     start_date=pendulum.today("UTC").add(days=-1),
-    schedule_interval="@monthly",
+    schedule="@monthly",
     params={"year": pendulum.now("UTC").year},
 )
 def oa_gold_open_access_mechanisms():
@@ -31,7 +32,6 @@ def oa_gold_open_access_mechanisms():
             "endpoint": get_url(query.format(year=year)),
             "type_of_query": key,
         }
-
 
     @task(executor_config=kubernetes_executor_config)
     def fetch_count(parameters):
