@@ -75,6 +75,7 @@ x-airflow-common: &airflow-common
     - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
     - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
     - ${AIRFLOW_PROJ_DIR:-.}/tests:/opt/airflow/tests
+    - ${AIRFLOW_PROJ_DIR:-.}/scripts:/opt/airflow/scripts
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on: &airflow-common-depends-on
     redis:
@@ -133,6 +134,15 @@ services:
       retries: 50
       start_period: 30s
     restart: always
+
+  airflow-bootstrap:
+    <<: *airflow-common
+    depends_on:
+      airflow-webserver:
+        condition: service_healthy
+    command: >
+      bash -c "/entrypoint airflow connections import ./scripts/connections/connections.json"
+    restart: "no"
 
   airflow-webserver:
     <<: *airflow-common
