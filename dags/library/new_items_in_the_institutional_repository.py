@@ -16,7 +16,7 @@ from tenacity import retry_if_exception_type, stop_after_attempt
 
 @dag(
     start_date=pendulum.today("UTC").add(days=-1),
-    schedule_interval="@monthly",
+    schedule="@monthly",
     params={"year": 2023},
 )
 def library_new_items_in_the_institutional_repository():

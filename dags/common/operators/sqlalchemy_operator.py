@@ -1,5 +1,5 @@
 from airflow.decorators import task
-from airflow.hooks.postgres_hook import PostgresHook
+from airflow.providers.postgres.hooks.postgres import PostgresHook
 from executor_config import kubernetes_executor_config
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
