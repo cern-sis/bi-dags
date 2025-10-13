@@ -9,7 +9,7 @@ from common.operators.sqlalchemy_operator import sqlalchemy_task
 
 @dag(
     start_date=datetime.datetime(2025, 10, 13),
-    schedule="* 2 * * *",
+    schedule="0 2 * * *",
     max_active_runs=5,
     catchup=True,
     tags=["library"],
