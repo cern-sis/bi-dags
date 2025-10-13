@@ -1,6 +1,6 @@
 {
-  "people_counter": {
-    "conn_type": "http",
+  "cameras_conn": {
+    "conn_type": "postgres",
     "description": "",
     "login": "CHANGE_ME",
     "password": "CHANGE_ME",

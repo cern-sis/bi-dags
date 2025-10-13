@@ -1,17 +1,15 @@
 import datetime
 
-from airflow.decorators import dag, task
-from airflow.macros import ds_add, ds_format
-from airflow.providers.http.hooks.http import HttpHook
+from airflow.macros import ds_add
+from airflow.providers.postgres.hooks.postgres import PostgresHook
+from airflow.sdk import dag
 from common.models.library.library_people_counter import LibraryPeopleCounter
 from common.operators.sqlalchemy_operator import sqlalchemy_task
-from requests.auth import HTTPDigestAuth
-from tenacity import retry_if_exception_type, stop_after_attempt
 
 
 @dag(
-    start_date=datetime.datetime(2024, 11, 28),
-    schedule="0 2 * * *",
+    start_date=datetime.datetime(2025, 10, 13),
+    schedule="* 2 * * *",
     max_active_runs=5,
     catchup=True,
     tags=["library"],
@@ -19,70 +17,28 @@ from tenacity import retry_if_exception_type, stop_after_attempt
 def library_people_counter_dag():
     """A DAG to fetch and store library occupancy data"""
 
-    http_hook = HttpHook(
-        http_conn_id="people_counter", auth_type=HTTPDigestAuth, method="GET"
-    )
-
-    @task()
-    def set_params(**context):
-        end_date = ds_format(ds_add(context["ds"], 1), "%Y-%m-%d", "%Y%m%d")
-        return {
-            "start": context["ds_nodash"],
-            "end": end_date,
-            "resolution": "hour",
-        }
-
-    @task()
-    def fetch_occupancy(query_params):
-
-        response = http_hook.run_with_advanced_retry(
-            endpoint="/a3dpc/api/export_occupancy/json",
-            _retry_args={
-                "stop": stop_after_attempt(3),
-                "retry": retry_if_exception_type(Exception),
-            },
-            data=query_params,
-        )
-        return response.json()
-
-    @task()
-    def fetch_inout(query_params):
-
-        response = http_hook.run_with_advanced_retry(
-            endpoint="/a3dpc/api/export/json",
-            _retry_args={
-                "stop": stop_after_attempt(3),
-                "retry": retry_if_exception_type(Exception),
-            },
-            data=query_params,
-        )
-        return response.json()
-
     @sqlalchemy_task(conn_id="superset")
-    def populate_database(results_occupancy, results_inout, session, **context):
+    def transfer_data(session, **context):
+        hook_in = PostgresHook(postgres_conn_id="cameras_conn")
+        since_date = ds_add(context["ds"], -1)
+        sql = f"""SELECT time as date,
+                         occupancy,
+                         total_in as people_in,
+                         total_out as people_out
+                FROM public.axis_people_counter
+                WHERE camera = '1651' and
+                time between '{since_date}' and '{context['ds']}' ORDER BY time asc;"""
+        print(sql)
+        results = hook_in.get_records(sql)
 
-        records = []
-
-        for occupancy, inout in zip(results_occupancy["data"], results_inout["data"]):
-            if not occupancy["peak"] and not inout["in"] and not inout["out"]:
-                continue
-
-            occupancy["peak"] = occupancy["peak"] or 0
-            inout["in"] = inout["in"] or 0
-            inout["out"] = inout["out"] or 0
-
-            records.append(
-                LibraryPeopleCounter(
-                    date=occupancy["start"],
-                    occupancy=occupancy["peak"],
-                    people_in=inout["in"],
-                    people_out=inout["out"],
-                )
+        for row in results:
+            record = LibraryPeopleCounter(
+                date=row[0], occupancy=row[1], people_in=row[2], people_out=row[3]
             )
-            session.add_all(records)
+            session.merge(record)
+        session.commit()
 
-    params = set_params()
-    populate_database(fetch_occupancy(params), fetch_inout(params))
+    transfer_data()
 
 
 library_people_counter_dag()
