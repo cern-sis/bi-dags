@@ -102,9 +102,7 @@ After completing these steps, your environment should be set up and ready for ru
 docker-compose up
 ```
 
-All the required environment variables are already configured in the `docker-compose.yml` file.
-
-The user is `admin` the password is auto-generated and logged in the `webserver`
+2. Run migration to head if they were not yet ran
 
 ## Database Migrations
 
