@@ -146,7 +146,8 @@ services:
       airflow-api-server:
         condition: service_healthy
     command: >
-      bash -c "/entrypoint airflow connections import ./scripts/connections/connections.json"
+      bash -c "/entrypoint airflow connections import ./scripts/connections.json"
+      bash -c "/entrypoint airflow variables import ./scripts/variables.json"
     restart: "no"
 
   airflow-api-server:
