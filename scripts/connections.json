@@ -1,0 +1,22 @@
+{
+  "cameras_conn": {
+    "conn_type": "postgres",
+    "description": "",
+    "login": "CHANGE_ME",
+    "password": "CHANGE_ME",
+    "host": "dbod-ssm-timescale.cern.ch",
+    "port": null,
+    "schema": "CHANGE_ME",
+    "extra": ""
+  },
+  "library_catalog_conn": {
+    "conn_type": "http",
+    "description": "Used for catalog harvesting",
+    "login": "",
+    "password": null,
+    "host": "sandbox-cds-ils.web.cern.ch/",
+    "port": null,
+    "schema": "",
+    "extra": ""
+  }
+}

@@ -64,7 +64,7 @@ jobs:
           -e AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION="true"
           -e AIRFLOW__CORE__LOAD_EXAMPLES="false"
           $REGISTRY/$IMAGE@${{ steps.build.outputs.image-digest }}
-          bash -c "airflow db migrate && airflow connections import /opt/airflow/scripts/connections/connections.json && pytest /opt/airflow/tests --cov --cov-report=xml"
+          bash -c "airflow db migrate && airflow connections import /opt/airflow/scripts/connections.json && pytest /opt/airflow/tests --cov --cov-report=xml"
 
       - name: Copy test coverage file to host machine
         run: docker cp biproject:/opt/airflow/coverage.xml .

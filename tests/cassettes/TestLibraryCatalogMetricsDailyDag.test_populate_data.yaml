@@ -1,0 +1,103 @@
+interactions:
+  - request:
+      body: null
+      headers:
+        Accept:
+          - "*/*"
+        Accept-Encoding:
+          - gzip, deflate
+        Connection:
+          - keep-alive
+      method: GET
+      uri: http://sandbox-cds-ils.web.cern.ch/api/items/?size=1&q=status%3AMISSING
+    response:
+      body:
+        string: ""
+      headers:
+        cache-control:
+          - no-cache
+        content-length:
+          - "0"
+        location:
+          - https://sandbox-cds-ils.web.cern.ch/api/items/?size=1&q=status%3AMISSING
+      status:
+        code: 302
+        message: Found
+  - request:
+      body: null
+      headers:
+        Accept:
+          - "*/*"
+        Accept-Encoding:
+          - gzip, deflate
+        Connection:
+          - keep-alive
+      method: GET
+      uri: https://sandbox-cds-ils.web.cern.ch/api/items/?size=1&q=status%3AMISSING
+    response:
+      body:
+        string:
+          '{"aggregations":{"circulation":{"buckets":[{"doc_count":10237,"key":"NOT_ON_LOAN"}],"doc_count_error_upper_bound":0,"sum_other_doc_count":0},"document_type":{"buckets":[{"doc_count":9018,"key":"BOOK"},{"doc_count":1203,"key":"PROCEEDINGS"},{"doc_count":13,"key":"STANDARD"},{"doc_count":3,"key":"SERIAL_ISSUE"}],"doc_count_error_upper_bound":0,"sum_other_doc_count":0},"internal_location":{"buckets":[{"doc_count":7752,"key":"Central
+          Library"},{"doc_count":2300,"key":"Depot 1, bldg. 2 (DE1)"},{"doc_count":115,"key":"Depot
+          2, bldg. 2 (DE2)"},{"doc_count":46,"key":"LSL Library"},{"doc_count":24,"key":"Depot
+          3, bldg. 2 (DE3)"}],"doc_count_error_upper_bound":0,"sum_other_doc_count":0},"location":{"buckets":[{"doc_count":10237,"key":"CERN
+          Central Library 3"}],"doc_count_error_upper_bound":0,"sum_other_doc_count":0},"medium":{"buckets":[{"doc_count":10228,"key":"PAPER"},{"doc_count":8,"key":"DVD"},{"doc_count":1,"key":"VHS"}],"doc_count_error_upper_bound":0,"sum_other_doc_count":0},"restrictions":{"buckets":[{"doc_count":9432,"key":"NO_RESTRICTION"},{"doc_count":805,"key":"ONE_WEEK"}],"doc_count_error_upper_bound":0,"sum_other_doc_count":0},"status":{"buckets":[{"doc_count":10237,"key":"MISSING"}],"doc_count_error_upper_bound":0,"sum_other_doc_count":0}},"hits":{"hits":[{"created":"2021-05-04T17:09:24.952341+00:00","id":"w8ejw-g6759","links":{"self":"https://sandbox-cds-ils.web.cern.ch/api/items/w8ejw-g6759"},"metadata":{"$schema":"https://cds-ils.cern.ch/schemas/items/item-v2.0.0.json","barcode":"57-1175-9","circulation":{},"circulation_restriction":"NO_RESTRICTION","collection":null,"created_by":{"type":"script","value":"migration"},"creation_date":"2010-08-25T10:56:13","document":{"authors":"Godfrey,
+          C; Siddons, A W","cover_metadata":{"urls":{"is_placeholder":true,"large":"https://sandbox-cds-ils.web.cern.ch/api/static/images/placeholder.png","medium":"https://sandbox-cds-ils.web.cern.ch/api/static/images/placeholder.png","small":"https://sandbox-cds-ils.web.cern.ch/api/static/images/placeholder.png"}},"document_type":"BOOK","pid":"pm5xp-bh006","publication_year":"1951","title":"Four
+          figure tables"},"document_pid":"pm5xp-bh006","expected_arrival_date":"","internal_location":{"legacy_ids":["6"],"location":{"name":"CERN
+          Central Library 3","opening_exceptions":[],"opening_weekdays":[{"is_open":true,"times":[{"end_time":"18:00","start_time":"08:30"}],"weekday":"monday"},{"is_open":true,"times":[{"end_time":"18:00","start_time":"08:30"}],"weekday":"tuesday"},{"is_open":true,"times":[{"end_time":"18:00","start_time":"08:30"}],"weekday":"wednesday"},{"is_open":true,"times":[{"end_time":"18:00","start_time":"08:30"}],"weekday":"thursday"},{"is_open":true,"times":[{"end_time":"18:00","start_time":"08:30"}],"weekday":"friday"},{"is_open":false,"weekday":"saturday"},{"is_open":false,"weekday":"sunday"}],"pid":"fkhfc-q7226"},"location_pid":"fkhfc-q7226","name":"Central
+          Library","pid":"xf1j3-z3w34"},"internal_location_pid":"xf1j3-z3w34","legacy_id":"","legacy_library_id":"6","medium":"PAPER","modification_date":"2010-08-25T10:56:13","number_of_requests":0,"pid":"w8ejw-g6759","shelf":"518.2
+          GOD","status":"MISSING"},"updated":"2024-06-30T13:41:40.639738+00:00"}],"total":10237},"links":{"next":"https://sandbox-cds-ils.web.cern.ch/api/items/?q=status:MISSING&size=1&page=2","self":"https://sandbox-cds-ils.web.cern.ch/api/items/?q=status:MISSING&size=1&page=1"}}'
+      headers:
+        content-length:
+          - "3398"
+        content-security-policy:
+          - "default-src 'self'; script-src 'self'; object-src 'self'; img-src 'self';
+            style-src 'self' 'unsafe-inline'; font-src 'self' data: https://fonts.gstatic.com
+            https://fonts.googleapis.com"
+        content-type:
+          - application/json
+        date:
+          - Fri, 17 Oct 2025 10:48:43 GMT
+        link:
+          - <https://sandbox-cds-ils.web.cern.ch/api/items/?q=status:MISSING&size=1&page=1>;
+            rel="self", <https://sandbox-cds-ils.web.cern.ch/api/items/?q=status:MISSING&size=1&page=2>;
+            rel="next"
+        permissions-policy:
+          - interest-cohort=()
+        referrer-policy:
+          - strict-origin-when-cross-origin
+        retry-after:
+          - "60"
+        server:
+          - nginx
+        set-cookie:
+          - session=22849438dbd18025_68f21f0b.PcvX6JGUnqWByGlP6a2aXMavAjw; Secure; HttpOnly;
+            Path=/; SameSite=Lax
+          - 44bef3fdc19f5c97945f03766f26b12f=7ab17786972c1955c76945a72a329271; path=/;
+            HttpOnly; Secure; SameSite=None
+        strict-transport-security:
+          - max-age=31556926; includeSubDomains
+        transfer-encoding:
+          - chunked
+        vary:
+          - Accept-Encoding
+        x-content-type-options:
+          - nosniff
+        x-frame-options:
+          - sameorigin
+        x-ratelimit-limit:
+          - "150"
+        x-ratelimit-remaining:
+          - "149"
+        x-ratelimit-reset:
+          - "1760698184"
+        x-session-id:
+          - 22849438dbd18025_68f21f0b
+        x-user-id:
+          - "80395"
+        x-xss-protection:
+          - 1; mode=block
+      status:
+        code: 200
+        message: OK
+version: 1
