@@ -1,4 +1,6 @@
 import datetime
+import json
+import logging
 
 from airflow.macros import ds_add
 from airflow.models import Variable
@@ -6,6 +8,9 @@ from airflow.providers.http.hooks.http import HttpHook
 from airflow.sdk import dag
 from common.models.library.library_catalog_metrics import LibraryCatalogMetrics
 from common.operators.sqlalchemy_operator import sqlalchemy_task
+from library.utils import set_hist_library_catalog, set_stat_library_catalog
+
+logger = logging.getLogger(__name__)
 
 
 @dag(
@@ -19,7 +24,7 @@ def library_catalog_metrics():
     """A DAG to fetch and store library occupancy data"""
 
     @sqlalchemy_task(conn_id="superset")
-    def populate_data(category, filter, session, **context):
+    def populate_data(note, category, filter, session, **context):
 
         hook = HttpHook(
             http_conn_id="library_catalog_conn",
@@ -48,9 +53,51 @@ def library_catalog_metrics():
                         aggregation=agg_name,
                         key=bucket["key"],
                         value=bucket["doc_count"],
+                        note=note,
                     )
                 )
         session.add_all(records)
+
+    @sqlalchemy_task(conn_id="superset")
+    def populate_data_hist(
+        note, endpoint, filter, group_by, metrics, session, **context
+    ):
+        logger.info("Fetching data for ", note)
+
+        date_to_fetch = ds_add(context["ds"], -1)
+        data = {}
+
+        if filter:
+            data["q"] = filter
+        else:
+            data["q"] = f"_created:[{date_to_fetch} TO {date_to_fetch}]"
+        if group_by:
+            data["group_by"] = json.dumps(group_by)
+        if metrics:
+            data["metrics"] = json.dumps(metrics)
+
+        set_hist_library_catalog(
+            note, endpoint, data, date_to_fetch, data.get("q"), session
+        )
+
+    @sqlalchemy_task(conn_id="superset")
+    def populate_data_stats(note, stat, params, session, **context):
+        logger.info("Fetching data for %s", note)
+
+        date_to_fetch = ds_add(context["ds"], -1)
+        data = {
+            stat: {
+                "stat": stat,
+                "params": {
+                    "start_date": date_to_fetch,
+                    "end_date": date_to_fetch,
+                    "interval": "day",
+                    **params,
+                },
+            }
+        }
+
+        set_stat_library_catalog(note, stat, data, date_to_fetch, session)
 
     @sqlalchemy_task(conn_id="superset")
     def collect_ils_record_changes(session, **context):
@@ -85,35 +132,73 @@ def library_catalog_metrics():
                     },
                 }
 
-        hook = HttpHook(
-            http_conn_id="library_catalog_conn",
-            method="POST",
-        )
+        set_stat_library_catalog("ils_record_changes", data, session)
 
-        response = hook.run(
-            endpoint="api/stats",
-            json=data,
-            headers={"Authorization": f"Bearer {Variable.get('CATALOG_API_TOKEN')}"},
-        )
+    populate_data_hist(
+        "1Q1",
+        "circulation/loans/stats",
+        None,
+        [{"field": "_created", "interval": "1d"}],
+        None,
+    )
+    populate_data_stats("1Q2", "loan-transitions", params={"trigger": "extend"})
+    populate_data("1Q3", "items", "status:CAN_CIRCULATE")
+    populate_data_hist(
+        "2",
+        "circulation/loans/stats",
+        None,
+        [{"field": "start_date", "interval": "1d"}],
+        [{"field": "extra_data.stats.loan_duration", "aggregation": "avg"}],
+    )
+    populate_data_hist(
+        "3.1",
+        "circulation/loans/stats",
+        "delivery.method:SELF-CHECKOUT",
+        [{"field": "_created", "interval": "1d"}],
+        None,
+    )
+    populate_data_hist(
+        "3.2",
+        "circulation/loans/stats",
+        None,
+        [
+            {"field": "_created", "interval": "1M"},
+            {"field": "extra_data.stats.available_items_during_request"},
+        ],
+        [{"field": "extra_data.stats.waiting_time", "aggregation": "avg"}],
+    )
+    populate_data_hist(
+        "3.5.1",
+        "acquisition/stats",
+        None,
+        [{"field": "_created", "interval": "1d"}],
+        [{"field": "stats.document_request_waiting_time", "aggregation": "avg"}],
+    )
+    populate_data_hist(
+        "3.5.2",
+        "acquisition/stats",
+        None,
+        [{"field": "_created", "interval": "1d"}],
+        [{"field": "stats.order_processing_time", "aggregation": "avg"}],
+    )
+    populate_data_hist(
+        "3.5.3",
+        "document-requests/stats",
+        None,
+        [{"field": "_created", "interval": "1d"}],
+        [{"field": "stats.order_processing_time", "aggregation": "avg"}],
+    )
+    populate_data("3.5.4", "document-requests", None)
 
-        records = []
-        for _, metric_data in response.json().items():
-            for bucket in metric_data["buckets"]:
-                records.append(
-                    LibraryCatalogMetrics(
-                        date=date_to_fetch,
-                        filter="ils_record_changes",
-                        category="api/stats",
-                        aggregation=bucket["pid_type"],
-                        key=bucket["method"],
-                        value=int(bucket["count"]),
-                    )
-                )
-        session.add_all(records)
-
-    populate_data("items", "status:CAN_CIRCULATE")
-    populate_data("circulation/loans", None)
     collect_ils_record_changes()
+    populate_data_hist(
+        "5.2",
+        "circulation/loans/stats",
+        None,
+        [{"field": "patron.department.keyword"}],
+        None,
+    )
+    populate_data("6", "circulation/loans", None)
 
 
 library_catalog_metrics()

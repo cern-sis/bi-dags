@@ -14,7 +14,7 @@
     "description": "Used for catalog harvesting",
     "login": "",
     "password": null,
-    "host": "sandbox-cds-ils.web.cern.ch/",
+    "host": "https://sandbox-cds-ils.web.cern.ch/",
     "port": null,
     "schema": "",
     "extra": ""
