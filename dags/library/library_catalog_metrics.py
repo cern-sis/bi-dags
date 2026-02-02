@@ -62,7 +62,7 @@ def library_catalog_metrics():
     def populate_data_hist(
         note, endpoint, filter, group_by, metrics, session, **context
     ):
-        logger.info("Fetching data for ", note)
+        logger.info("Fetching data for %s", note)
 
         date_to_fetch = ds_add(context["ds"], -1)
         data = {}
@@ -101,6 +101,8 @@ def library_catalog_metrics():
 
     @sqlalchemy_task(conn_id="superset")
     def collect_ils_record_changes(session, **context):
+        logger.info("Fetching data for ils_record_changes")
+
         methods = ["insert", "update", "delete"]
         pid_types = [
             "acqoid",
