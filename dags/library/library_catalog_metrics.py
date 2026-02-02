@@ -26,6 +26,7 @@ def library_catalog_metrics():
     @sqlalchemy_task(conn_id="superset")
     def populate_data(note, category, filter, session, **context):
 
+        logger.info("Fetching data for %s", note)
         hook = HttpHook(
             http_conn_id="library_catalog_conn",
             method="GET",
@@ -133,8 +134,9 @@ def library_catalog_metrics():
                         "interval": "day",
                     },
                 }
-
-        set_stat_library_catalog("ils_record_changes", data, session)
+        set_stat_library_catalog(
+            "ils_record_changes", "ils_record_changes", data, date_to_fetch, session
+        )
 
     populate_data_hist(
         "1Q1",
