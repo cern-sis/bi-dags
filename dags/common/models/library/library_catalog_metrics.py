@@ -15,3 +15,4 @@ class LibraryCatalogMetrics(Base):
     key = Column(String, nullable=False)
     value = Column(Integer, nullable=False)
     created_at = Column(DateTime, default=func.now())
+    note = Column(String(length=255), nullable=True)
