@@ -35,14 +35,14 @@ def set_stat_library_catalog(note, stat, data, date, session):
     )
 
     records = []
-    for _, metric_data in response.json().items():
+    for metric_name, metric_data in response.json().items():
         for bucket in metric_data["buckets"]:
             records.append(
                 LibraryCatalogMetrics(
                     date=date,
-                    filter=None,
+                    filter=stat,
                     category=endpoint,
-                    aggregation=stat,
+                    aggregation=metric_name,
                     key=bucket["key"],
                     value=int(bucket["count"]),
                     note=note,
@@ -94,3 +94,26 @@ def set_hist_library_catalog(note, endpoint, data, date, filter, session):
                 )
 
     session.add_all(records)
+
+
+def aggregation_walker(aggregations, path=[]):
+    """Walks through nested aggregations and extracts bucket data into a flat structure."""
+
+    extracted_aggreggations = {}
+
+    for agg_name, agg_items in aggregations.items():
+        if not isinstance(agg_items, dict):
+            continue
+        if "buckets" not in agg_items:
+            extracted_aggreggations.update(
+                aggregation_walker(agg_items, path + [agg_name])
+            )
+        else:
+            full_agg_path = ".".join(path + [agg_name])
+            extracted_aggreggations[full_agg_path] = {}
+            for bucket in agg_items["buckets"]:
+                extracted_aggreggations[full_agg_path][bucket["key"]] = bucket[
+                    "doc_count"
+                ]
+
+    return extracted_aggreggations
