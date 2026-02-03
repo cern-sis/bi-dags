@@ -8,7 +8,11 @@ from airflow.providers.http.hooks.http import HttpHook
 from airflow.sdk import dag
 from common.models.library.library_catalog_metrics import LibraryCatalogMetrics
 from common.operators.sqlalchemy_operator import sqlalchemy_task
-from library.utils import set_hist_library_catalog, set_stat_library_catalog
+from library.utils import (
+    aggregation_walker,
+    set_hist_library_catalog,
+    set_stat_library_catalog,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -42,18 +46,19 @@ def library_catalog_metrics():
         )
 
         records = []
-        for agg_name, agg_items in response.json()["aggregations"].items():
-            if "buckets" not in agg_items:
-                continue
-            for bucket in agg_items["buckets"]:
+
+        transformed_aggregations = aggregation_walker(response.json()["aggregations"])
+
+        for agg_name, key_values in transformed_aggregations.items():
+            for key, value in key_values.items():
                 records.append(
                     LibraryCatalogMetrics(
                         date=context["ds"],
                         filter=filter,
                         category=category,
                         aggregation=agg_name,
-                        key=bucket["key"],
-                        value=bucket["doc_count"],
+                        key=key,
+                        value=value,
                         note=note,
                     )
                 )
@@ -102,7 +107,7 @@ def library_catalog_metrics():
 
     @sqlalchemy_task(conn_id="superset")
     def collect_ils_record_changes(session, **context):
-        logger.info("Fetching data for ils_record_changes")
+        logger.info("Fetching data for 4")
 
         methods = ["insert", "update", "delete"]
         pid_types = [
@@ -135,7 +140,7 @@ def library_catalog_metrics():
                     },
                 }
         set_stat_library_catalog(
-            "ils_record_changes", "ils_record_changes", data, date_to_fetch, session
+            "4", "ils_record_changes", data, date_to_fetch, session
         )
 
     populate_data_hist(
