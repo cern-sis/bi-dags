@@ -45,6 +45,8 @@ def library_catalog_metrics():
             headers={"Authorization": f"Bearer {Variable.get('CATALOG_API_TOKEN')}"},
         )
 
+        date_to_fetch = ds_add(context["ds"], -1)
+
         records = []
 
         transformed_aggregations = aggregation_walker(response.json()["aggregations"])
@@ -53,7 +55,7 @@ def library_catalog_metrics():
             for key, value in key_values.items():
                 records.append(
                     LibraryCatalogMetrics(
-                        date=context["ds"],
+                        date=date_to_fetch,
                         filter=filter,
                         category=category,
                         aggregation=agg_name,
