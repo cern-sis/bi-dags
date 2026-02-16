@@ -75,10 +75,10 @@ def library_catalog_metrics():
         date_to_fetch = ds_add(context["ds"], -1)
         data = {}
 
+        data["q"] = f"_created:[{date_to_fetch} TO {date_to_fetch}]"
         if filter:
-            data["q"] = filter
-        else:
-            data["q"] = f"_created:[{date_to_fetch} TO {date_to_fetch}]"
+            data["q"] = f"{data['q']} AND ({filter})"
+
         if group_by:
             data["group_by"] = json.dumps(group_by)
         if metrics:
