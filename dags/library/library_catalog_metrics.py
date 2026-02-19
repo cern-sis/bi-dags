@@ -171,10 +171,18 @@ def library_catalog_metrics():
     populate_data_hist(
         "3.2",
         "circulation/loans/stats",
-        None,
+        "extra_data.stats.available_items_during_request:True",
         [
-            {"field": "_created", "interval": "1M"},
-            {"field": "extra_data.stats.available_items_during_request"},
+            {"field": "_created", "interval": "1d"},
+        ],
+        [{"field": "extra_data.stats.waiting_time", "aggregation": "avg"}],
+    )
+    populate_data_hist(
+        "3.3",
+        "circulation/loans/stats",
+        "extra_data.stats.available_items_during_request:False",
+        [
+            {"field": "_created", "interval": "1d"},
         ],
         [{"field": "extra_data.stats.waiting_time", "aggregation": "avg"}],
     )
