@@ -90,7 +90,7 @@ x-airflow-common: &airflow-common
 
 services:
   postgres:
-    image: postgres:13
+    image: postgres:16.11
     environment:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
@@ -105,7 +105,7 @@ services:
     restart: always
 
   postgres_local:
-    image: postgres:13
+    image: postgres:16.11
     environment:
       POSTGRES_DB: bi_local
       POSTGRES_USER: bi_local
